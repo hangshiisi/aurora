@@ -6,6 +6,7 @@
  **********************************/
 
 #include "MP1Node.h"
+#include <sstream> 
 
 /*
  * Note: You can change/add any functions in MP1Node.{h,cpp}
@@ -96,8 +97,8 @@ int MP1Node::initThisNode(Address *joinaddr) {
 	/*
 	 * This function is partially implemented and may require changes
 	 */
-	int id = *(int*)(&memberNode->addr.addr);
-	int port = *(short*)(&memberNode->addr.addr[4]);
+	// int id = *(int*)(&memberNode->addr.addr);
+	// int port = *(short*)(&memberNode->addr.addr[4]);
 
 	memberNode->bFailed = false;
 	memberNode->inited = true;
@@ -163,6 +164,9 @@ int MP1Node::finishUpThisNode(){
    /*
     * Your code goes here
     */
+
+
+    return 0; 
 }
 
 /**
@@ -218,6 +222,106 @@ bool MP1Node::recvCallBack(void *env, char *data, int size ) {
 	/*
 	 * Your code goes here
 	 */
+
+
+
+        assert(size >= (int)sizeof(MessageHdr));
+
+        MessageHdr* msg = (MessageHdr*) data;
+        Address *src_addr = (Address*)(msg+1);
+
+        size -= sizeof(MessageHdr) + sizeof(Address) + 1;
+        data += sizeof(MessageHdr) + sizeof(Address) + 1;
+
+        switch (msg->msgType) {
+                case JOINREQ:
+                        onJoin(src_addr, data, size);
+                        onHeartbeat(src_addr, data, size);
+                        break;
+                case PING: 
+                        onHeartbeat(src_addr, data, size);
+                        break;
+                case JOINREP:
+                        {
+                        memberNode->inGroup = 1;
+                        stringstream msg;
+                        msg << "JOINREP from " <<  src_addr->getAddress();
+                        msg << " data " << *(long*)(data );
+                        log->LOG(&memberNode->addr, msg.str().c_str());
+                        onHeartbeat(src_addr, data, size);
+                        break;
+                        }
+                default:
+                        log->LOG(&memberNode->addr, "Received other msg");
+                        break;
+        }
+
+        return true; 
+}
+
+
+Address AddressFromMLE(MemberListEntry* mle) {
+        Address a;
+        memcpy(a.addr, &mle->id, sizeof(int));
+        memcpy(&a.addr[4], &mle->port, sizeof(short));
+        return a;
+}
+
+void MP1Node::onJoin(Address* addr, void* data, size_t size) {
+    MessageHdr* msg;
+    size_t msgsize = sizeof(MessageHdr) + sizeof(memberNode->addr) + sizeof(long) + 1;
+    msg = (MessageHdr *) malloc(msgsize * sizeof(char));
+    msg->msgType = JOINREP;
+
+    memcpy((char *)(msg+1), &memberNode->addr, sizeof(memberNode->addr));
+    memcpy((char *)(msg+1) + sizeof(memberNode->addr) + 1, &memberNode->heartbeat, sizeof(long));
+    
+    stringstream ss;
+    ss<< "Sending JOINREP to " << addr->getAddress() <<" heartbeat "<<memberNode->heartbeat;
+    log->LOG(&memberNode->addr, ss.str().c_str());
+    emulNet->ENsend(&memberNode->addr, addr, (char *)msg, msgsize);
+    free(msg);
+}
+
+void MP1Node::onHeartbeat(Address* addr, void* data, size_t size) {
+        std::stringstream msg;
+        assert(size >= sizeof(long));
+        long *heartbeat = (long*)data;
+
+        //msg << "Heartbeat from " << addr->getAddress() << ": ";
+        //msg << *heartbeat;
+        //log->LOG(&memberNode->addr, msg.str().c_str());
+        //msg.str("");
+
+        bool newData = UpdateMemberList(addr, *heartbeat);
+        if (newData) {
+                LogMemberList();
+                SendHBSomewhere(addr, *heartbeat);
+        } else {
+                //log->LOG(&memberNode->addr, "Heartbeat up-to-date.");
+        }
+}
+
+bool MP1Node::UpdateMemberList(Address *addr, long heartbeat)  {
+        vector<MemberListEntry>::iterator it;
+        for (it = memberNode->memberList.begin(); it != memberNode->memberList.end(); it++) {
+                if ((AddressFromMLE(&(*it)) == *addr) == 0) {
+                        if (heartbeat > it->getheartbeat()) {
+                                it->setheartbeat(heartbeat);
+                                it->settimestamp(par->getcurrtime());
+                                return true;
+                        } else {
+                                return false;
+                        }
+                }
+        }
+        MemberListEntry mle(*((int*)addr->addr),
+                            *((short*)&(addr->addr[4])),
+                            heartbeat,
+                            par->getcurrtime());
+        memberNode->memberList.push_back(mle);
+        log->logNodeAdd(&memberNode->addr, addr);
+        return true;
 }
 
 /**
@@ -232,6 +336,42 @@ void MP1Node::nodeLoopOps() {
 	/*
 	 * Your code goes here
 	 */
+
+
+        int timeout = 5;
+
+        stringstream ss;
+        for (vector<MemberListEntry>::iterator it = memberNode->memberList.begin(); it != memberNode->memberList.end(); it++) {
+            //ss << "Current: " << par->getcurrtime() << " ts: " << it->timestamp << " id: "<< it->id;
+            //log->LOG(&memberNode->addr, ss.str().c_str());
+            //ss.str("");
+            if (par->getcurrtime() - it->timestamp > timeout) {
+                Address addr = AddressFromMLE(&(*it));
+                ss << "Timing out " << addr.getAddress();
+                log->LOG(&memberNode->addr, ss.str().c_str());
+                ss.str("");
+                
+                vector<MemberListEntry>::iterator next_it = it;
+                vector<MemberListEntry>::iterator next_next_it = it+1;
+                for (next_it = it; next_next_it != memberNode->memberList.end(); next_it++, next_next_it++) {
+                    *next_it = *next_next_it;
+                }
+                memberNode->memberList.resize(memberNode->memberList.size()-1);
+                it -= 1;
+                LogMemberList();
+                log->logNodeRemove(&memberNode->addr, &addr);
+            }
+    }
+        /*
+         * Your code goes here
+         */
+        //log->LOG(&memberNode->addr, "Looping.");
+
+        UpdateMemberList(&memberNode->addr, ++memberNode->heartbeat);
+
+        SendHBSomewhere(&memberNode->addr, 
+                        memberNode->heartbeat);
+
 
     return;
 }
@@ -269,6 +409,63 @@ void MP1Node::initMemberListTable(Member *memberNode) {
 	memberNode->memberList.clear();
 }
 
+
+/**
+ * FUNCTION NAME: initMemberListTable
+ *
+ * DESCRIPTION: Initialize the membership list
+ */
+void MP1Node::initMemberListTable(Member *memberNode, int id, short port) {
+        memberNode->memberList.clear();
+        MemberListEntry mle = MemberListEntry(id, port);
+        mle.settimestamp(par->getcurrtime());
+        mle.setheartbeat(memberNode->heartbeat);
+        memberNode->memberList.push_back(mle);
+}
+
+void MP1Node::LogMemberList() {
+    stringstream msg;
+    msg << "[";
+    for (vector<MemberListEntry>::iterator it = memberNode->memberList.begin(); it != memberNode->memberList.end(); it++) {
+        msg << it->getid() << ": " << it->getheartbeat() << "(" << it->gettimestamp() << "), ";
+    }
+    msg << "]";
+    //log->LOG(&memberNode->addr, msg.str().c_str());
+}
+
+void MP1Node::SendHBSomewhere(Address *src_addr, long heartbeat) {
+    int k = 30;
+    double prob = k / (double)memberNode->memberList.size();
+
+    MessageHdr *msg;
+    
+    size_t msgsize = sizeof(MessageHdr) + sizeof(src_addr->addr) + sizeof(long) + 1;
+    msg = (MessageHdr *) malloc(msgsize * sizeof(char));
+    
+    // create JOINREQ message: format of data is {struct Address myaddr}
+    msg->msgType = PING;
+    memcpy((char *)(msg+1), src_addr->addr, sizeof(src_addr->addr));
+    memcpy((char *)(msg+1) + sizeof(src_addr->addr) + 1, &heartbeat, sizeof(long));
+    
+    for (vector<MemberListEntry>::iterator it = memberNode->memberList.begin(); it != memberNode->memberList.end(); it++) {
+            Address dst_addr = AddressFromMLE(&(*it));
+            if ((dst_addr == memberNode->addr) == 0 ||
+                ((dst_addr == *src_addr) == 0)) {
+                    continue;
+            }
+            if ((((double)(rand() % 100))/100) < prob) {
+
+                //stringstream ss;
+                //ss<< "Relaying hb about " << src_addr->getAddress() << " to " << dst_addr.getAddress();
+                //log->LOG(&memberNode->addr, ss.str().c_str());
+                emulNet->ENsend(&memberNode->addr, &dst_addr, (char *)msg, msgsize);
+            } else {
+                //log->LOG(&memberNode->addr, "Not relaying hb");
+            }
+    }
+    free(msg);
+}
+
 /**
  * FUNCTION NAME: printAddress
  *
@@ -276,6 +473,8 @@ void MP1Node::initMemberListTable(Member *memberNode) {
  */
 void MP1Node::printAddress(Address *addr)
 {
-    printf("%d.%d.%d.%d:%d \n",  addr->addr[0],addr->addr[1],addr->addr[2],
-                                                       addr->addr[3], *(short*)&addr->addr[4]) ;    
+        printf("%d.%d.%d.%d:%d \n",  addr->addr[0],addr->addr[1],addr->addr[2],
+                        addr->addr[3], *(short*)&addr->addr[4]) ;    
 }
+
+

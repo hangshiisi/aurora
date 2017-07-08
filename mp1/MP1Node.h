@@ -31,6 +31,7 @@
 enum MsgTypes{
     JOINREQ,
     JOINREP,
+    PING,  
     DUMMYLASTMSGTYPE
 };
 
@@ -56,6 +57,9 @@ private:
 	Member *memberNode;
 	char NULLADDR[6];
 
+	void onHeartbeat(Address*, void*, size_t);
+	void onJoin(Address*, void*, size_t);
+
 public:
 	MP1Node(Member *, Params *, EmulNet *, Log *, Address *);
 	Member * getMemberNode() {
@@ -74,8 +78,13 @@ public:
 	int isNullAddress(Address *addr);
 	Address getJoinAddress();
 	void initMemberListTable(Member *memberNode);
+	void initMemberListTable(Member *memberNode, int, short);
+
 	void printAddress(Address *addr);
 	virtual ~MP1Node();
+	void LogMemberList();
+	void SendHBSomewhere(Address*, long);
+	bool UpdateMemberList(Address*, long);
 };
 
 #endif /* _MP1NODE_H_ */
