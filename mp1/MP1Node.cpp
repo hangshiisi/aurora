@@ -97,8 +97,8 @@ int MP1Node::initThisNode(Address *joinaddr) {
 	/*
 	 * This function is partially implemented and may require changes
 	 */
-	// int id = *(int*)(&memberNode->addr.addr);
-	// int port = *(short*)(&memberNode->addr.addr[4]);
+	int id = *(int*)(&memberNode->addr.addr);
+	int port = *(short*)(&memberNode->addr.addr[4]);
 
 	memberNode->bFailed = false;
 	memberNode->inited = true;
@@ -108,7 +108,7 @@ int MP1Node::initThisNode(Address *joinaddr) {
 	memberNode->heartbeat = 0;
 	memberNode->pingCounter = TFAIL;
 	memberNode->timeOutCounter = -1;
-    initMemberListTable(memberNode);
+    initMemberListTable(memberNode, id, port);
 
     return 0;
 }
