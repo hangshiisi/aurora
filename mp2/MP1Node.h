@@ -20,7 +20,7 @@
  */
 #define TREMOVE 20
 #define TFAIL 5
-#define TPING   2
+
 /*
  * Note: You can change/add any functions in MP1Node.{h,cpp}
  */
@@ -31,9 +31,15 @@
 enum MsgTypes{
     JOINREQ,
     JOINREP,
-	PING,
+    HEARTBEAT,
     DUMMYLASTMSGTYPE
 };
+
+typedef struct HeartbeatElement {
+  int id;
+	short port;
+	long heartbeat;
+} HeartbeatElement;
 
 /**
  * STRUCT NAME: MessageHdr
@@ -42,7 +48,8 @@ enum MsgTypes{
  */
 typedef struct MessageHdr {
 	enum MsgTypes msgType;
-}MessageHdr;
+  int n; // number of HeartbeatElement
+} MessageHdr;
 
 /**
  * CLASS NAME: MP1Node
@@ -57,19 +64,6 @@ private:
 	Member *memberNode;
 	char NULLADDR[6];
 
-    // Here are the handler functions
-    bool handle_joinreq(char* data, int size);
-	bool handle_join_reply(char *data, int size);
-	bool handle_ping(char *data, int size);
-    
-    // Here are extra functions
-    bool update_membership_list(MemberListEntry entry);
-    bool ping_others();
-    void check_failures();
-    
-    MemberListEntry byte_array_to_entry(MemberListEntry& node, char* entry, long timestamp);
-    char* entry_to_byte_array(MemberListEntry& node, char* entry);
-    
 public:
 	MP1Node(Member *, Params *, EmulNet *, Log *, Address *);
 	Member * getMemberNode() {
@@ -86,14 +80,14 @@ public:
 	bool recvCallBack(void *env, char *data, int size);
 	void nodeLoopOps();
 	int isNullAddress(Address *addr);
+  int sendMessage(enum MsgTypes msgType, Address *dstAddr);
 	Address getJoinAddress();
-	void initMemberListTable(Member *memberNode, int id, int port);
+  Address getAddress(int id, short port);
+	void initMemberListTable(Member *memberNode);
+  void addMember(int id, short port, long heartbeat);
+  bool updateMember(int id, short port, long heartbeat);
 	void printAddress(Address *addr);
 	virtual ~MP1Node();
-
-
-	char *member_list_serialize(char *buffer);
-	vector<MemberListEntry> member_list_deserialize(char *buffer, int rows);
 };
 
 #endif /* _MP1NODE_H_ */

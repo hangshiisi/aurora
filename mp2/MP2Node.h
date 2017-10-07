@@ -19,12 +19,15 @@
 #include "Message.h"
 #include "Queue.h"
 
-#define REPLICA_COUNT	3
-#define QUORUM_COUNT	2
-#define TRANSACTION_TIMEOUT 10
-#define STABLIZER_TRANS -1
-
-typedef tuple<Message, int, int> Transaction;
+typedef struct msgBase {
+  int xid;
+  int countTotal;
+  int countSuccess;
+	MessageType type;
+  string *key;
+	string *value;
+  int ctime;
+} msgBase;
 
 /**
  * CLASS NAME: MP2Node
@@ -54,29 +57,8 @@ private:
 	EmulNet * emulNet;
 	// Object of Log
 	Log * log;
-    
-    bool isCordinator = false;
-
-	vector<Node>::iterator myPosition;
-
-	// Message handlers
-	void handle_create_msg(Message msg);
-	void handle_read_msg(Message msg);
-	void handle_update_msg(Message msg);
-	void handle_delete_msg(Message msg);
-	void handle_reply_msg(Message msg);
-	void handle_readreply_msg(Message msg);
-
-	//
-	map <int, Transaction> transactions;
-	int inc_trans_success (int transID);
-    int dec_trans_timeout (int transID);
-    void invalidate_trans (int transID);
-	MessageType get_trans_type (int transID);
-	Message get_trans_message (int transID);
-    void check_for_timeout();
-    
-    bool isSameNode(Node n1, Node n2);
+	// Follow-up of replies to check quorums are OK
+	map<int, msgBase*> msg_list;
 
 public:
 	MP2Node(Member *memberNode, Params *par, EmulNet *emulNet, Log *log, Address *addressOfMember);
@@ -88,8 +70,7 @@ public:
 	void updateRing();
 	vector<Node> getMembershipList();
 	size_t hashFunction(string key);
-	vector<Node> findNeighbors(vector<Node> ringOfNodes);
-    void setNeighbors();
+	void findNeighbors();
 
 	// client side CRUD APIs
 	void clientCreate(string key, string value);
@@ -105,19 +86,23 @@ public:
 	void checkMessages();
 
 	// coordinator dispatches messages to corresponding nodes
-	void dispatchMessages(Message message);
+  msgBase* createBaseMsg(MessageType, string, string);
+  void dispatchMsg(msgBase*);
+  void processReply(int, bool, string);
+  void checkTimeout(msgBase*, int);
+  void checkQuorum(msgBase*);
 
 	// find the addresses of nodes that are responsible for a key
 	vector<Node> findNodes(string key);
 
 	// server
-	bool createKeyValue(string key, string value, ReplicaType replica);
-	string readKey(string key);
-	bool updateKeyValue(string key, string value, ReplicaType replica);
-	bool deletekey(string key);
+	bool createKeyValue(int xid, string key, string value, ReplicaType replica);
+	string readKey(int xid, string key);
+	bool updateKeyValue(int xid, string key, string value, ReplicaType replica);
+	bool deleteKey(int xid, string key);
 
 	// stabilization protocol - handle multiple failures
-	void stabilizationProtocol(vector<Node> curNeighbors);
+	void stabilizationProtocol();
 
 	~MP2Node();
 };
