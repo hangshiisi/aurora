@@ -19,6 +19,13 @@
 #include "Message.h"
 #include "Queue.h"
 
+#define REPLICA_COUNT	3
+#define QUORUM_COUNT	2
+#define TRANSACTION_TIMEOUT 10
+#define STABLIZER_TRANS -1
+
+typedef tuple<Message, int, int> Transaction;
+
 /**
  * CLASS NAME: MP2Node
  *
@@ -47,6 +54,29 @@ private:
 	EmulNet * emulNet;
 	// Object of Log
 	Log * log;
+    
+    bool isCordinator = false;
+
+	vector<Node>::iterator myPosition;
+
+	// Message handlers
+	void handle_create_msg(Message msg);
+	void handle_read_msg(Message msg);
+	void handle_update_msg(Message msg);
+	void handle_delete_msg(Message msg);
+	void handle_reply_msg(Message msg);
+	void handle_readreply_msg(Message msg);
+
+	//
+	map <int, Transaction> transactions;
+	int inc_trans_success (int transID);
+    int dec_trans_timeout (int transID);
+    void invalidate_trans (int transID);
+	MessageType get_trans_type (int transID);
+	Message get_trans_message (int transID);
+    void check_for_timeout();
+    
+    bool isSameNode(Node n1, Node n2);
 
 public:
 	MP2Node(Member *memberNode, Params *par, EmulNet *emulNet, Log *log, Address *addressOfMember);
@@ -58,7 +88,8 @@ public:
 	void updateRing();
 	vector<Node> getMembershipList();
 	size_t hashFunction(string key);
-	void findNeighbors();
+	vector<Node> findNeighbors(vector<Node> ringOfNodes);
+    void setNeighbors();
 
 	// client side CRUD APIs
 	void clientCreate(string key, string value);
@@ -86,7 +117,7 @@ public:
 	bool deletekey(string key);
 
 	// stabilization protocol - handle multiple failures
-	void stabilizationProtocol();
+	void stabilizationProtocol(vector<Node> curNeighbors);
 
 	~MP2Node();
 };
