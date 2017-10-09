@@ -1,0 +1,149 @@
+    1  hdfs dfs -put /etc/passwd /user/cloudera
+    2  pug -x mapreduce
+    3  pig -x mapreduce
+    4  hdfs dfs -put /etc/passwd /tmp/
+    5  beeline -u jdbc:hive2://
+    6  hbase shell
+    7  pwd
+    8  ls
+    9  mkdir test
+   10  cd test
+   11  ifconfig
+   12  scp aurora@192.168.1.77:/home/aurora/NJ/test . 
+   13  ls -al
+   14  scp -r aurora@192.168.1.77:/home/aurora/NJ/test . 
+   15  cd test/
+   16  ls
+   17  pwd
+   18  cd ..
+   19  ls
+   20  cd ..
+   21  ls
+   22  cd test/
+   23  ls
+   24  cd test/
+   25  ls
+   26  cd amaunet/
+   27  ls
+   28  ls -al
+   29  ls .git/
+   30  pwd
+   31  ls
+   32  cat countries.dat customers.dat  | ./smplMapper.py  | sort | ./smplReducer.py 
+   33  ls
+   34  vi smplMapper.py 
+   35  ls
+   36  ls -al
+   37  hadoop pwd
+   38  hadoop dfs -pwd
+   39  hadoop dfs ls
+   40  hadoop dfs -ls
+   41  hdfs ls
+   42  hdfs dfs -ls
+   43  ls
+   44  hdfs fs -put customers.dat /users/cloudera
+   45  hadoop fs -put customers.dat /users/cloudera
+   46  hadoop fs -put customers.dat /user/cloudera
+   47  hadoop fs ls /user/cloudera
+   48  hadoop fs -ls /user/cloudera
+   49  hadoop fs -put countries.dat  /user/cloudera
+   50  hadoop fs -mkdir input
+   51  hadoop fs -mkdir output
+   52  hadoop fs -ls
+   53  hadoop fs -put countries.dat  /user/cloudera/input/
+   54  hadoop fs -put customers.dat /user/cloudera/input
+   55  hadoop fs -chmod +rwx /user/cloudera/input
+   56  hadoop fs -chmod +rwx /user/cloudera/output
+   57  hadoop jar /usr/lib/hadoop-mapreduce/hadoop-streaming.jar  -input /user/cloudera/input -output /user/cloudera/output -mapper
+   58   /user/cloudera
+   59  ls
+   60  hadoop fs -put smplMapper.py /user/cloudera
+   61  hadoop fs -put smplReducer.py /user/cloudera
+   62  hadoop jar /usr/lib/hadoop-mapreduce/hadoop-streaming.jar  -input /user/cloudera/input -output /user/cloudera/output -mapper /user/cloudera/smplMapper.py -reducer /user/cloudera/smplReducer.py
+   63  hadoop fs -rmdir /user/cloudera/ouput
+   64  hadoop fs -ls
+   65  hadoop fs -rm /user/cloudera/ouput
+   66  hadoop jar /usr/lib/hadoop-mapreduce/hadoop-streaming.jar  -input /user/cloudera/input -output /user/cloudera/output_new -mapper /user/cloudera/smplMapper.py -reducer /user/cloudera/smplReducer.py
+   67  hadoop jar hadoop-streaming.jar  -input /user/cloudera/input -output /user/cloudera/output_new -mapper /user/cloudera/smplMapper.py -reducer /user/cloudera/smplReducer.py
+   68  echo $HADOOP_HOME
+   69  hadoop dfs -ls /usr/lib/hadoop-mapreduce
+   70  hadoop dfs -ls /usr/lib/
+   71  ls
+   72  vi smplMapper.py 
+   73  dos2unix *.py
+   74  ls -al
+   75  vi smplMapper.py 
+   76  history | grep put
+   77  hadoop fs -ls /user/cloudera
+   78  hadoop fs -ls /user/cloudera/input
+   79  hadoop fs -chmod +rwx /user/cloudera/*.py
+   80  history
+   81  hadoop jar /usr/lib/hadoop-mapreduce/hadoop-streaming.jar  -input /user/cloudera/input -output /user/cloudera/output_new -mapper /user/cloudera/smplMapper.py -reducer /user/cloudera/smplReducer.py
+   82  hadoop jar /usr/lib/hadoop-mapreduce/hadoop-streaming.jar  -input /user/cloudera/input -output /user/cloudera/output_new1 -mapper /user/cloudera/smplMapper.py -reducer /user/cloudera/smplReducer.py
+   83  hadoop fs -ls /user/cloudera
+   84  hadoop dfs -ls /user/cloudera/smplMapper.py
+   85  hadoop dfs -ls /user/cloudera
+   86  hadoop jar /usr/lib/hadoop-mapreduce/hadoop-streaming.jar  -input /user/cloudera/input -output /user/cloudera/output_new2 -mapper /user/cloudera/smplMapper.py  -reducer /user/cloudera/smplReducer.py
+   87  hdfs dfs -ls
+   88  hdfs dfs -ls /user/cloudera
+   89* hdfs dfs -mkdir 
+   90  whoami
+   91  hdfs dfs -ls /
+   92  hdfs dfs -ls /user
+   93  hdfs dfs -ls /user/cloudera
+   94  hdfs dfs -rm -r /user/cloudera/output*
+   95  hdfs dfs -ls
+   96  pwd
+   97  hadoop jar /usr/lib/hadoop-mapreduce/hadoop-streaming.jar  -input /user/cloudera/input -output /user/cloudera/output_new -mapper ./smplMapper.py -reducer ./smplReducer.py
+   98  hadoop jar /usr/lib/hadoop-mapreduce/hadoop-streaming.jar  -input /user/cloudera/input -output /user/cloudera/output_new -mapper /bin/cat -reducer /bin/wc
+   99  hadoop jar /usr/lib/hadoop-mapreduce/hadoop-streaming.jar  -input /user/cloudera/input -output /user/cloudera/output_new1 -mapper /bin/cat -reducer /bin/wc
+  100  hdfs dfs -ls /bin
+  101  hdfs dfs -ls /
+  102  hdfs dfs -mkdir /bin
+  103  which wc
+  104  hdfs dfs -put /usr/bin/wc /bin
+  105  hdfs dfs -ls /bin
+  106  which cat
+  107  hdfs dfs -put /bin/wc /bin
+  108  hdfs dfs -put /bin/cat /bin
+  109  hdfs dfs -chmod +rwx /bin
+  110  hdfs dfs -chmod +rwx /bin/*
+  111  hdfs dfs -ls /bin
+  112  hdfs dfs -chmod +rwx /bin/wc
+  113  hdfs dfs -ls /bin
+  114  history | grep rm
+  115* hdfs dfs 
+  116  history
+  117  hadoop jar /usr/lib/hadoop-mapreduce/hadoop-streaming.jar  -input /user/cloudera/input -output /user/cloudera/output_new1 -mapper /bin/cat -reducer /bin/wc
+  118  hadoop jar /usr/lib/hadoop-mapreduce/hadoop-streaming.jar  -input /user/cloudera/input -output /user/cloudera/output_new1 -mapper cat -file /bin/cat -reducer wc -file /bin/wc
+  119  hdfs dfs -ls
+  120  hdfs dfs -ls /bin
+  121  hadoop jar /usr/lib/hadoop-mapreduce/hadoop-streaming.jar  -input /user/cloudera/input -output /user/cloudera/output_new1 -mapper cat  -reducer "wc -l" 
+  122  hadoop jar /usr/lib/hadoop-mapreduce/hadoop-streaming.jar  -input /user/cloudera/input -output /user/cloudera/output_new2 -mapper cat  -reducer "wc -l" 
+  123  hadoop jar /usr/lib/hadoop-mapreduce/hadoop-streaming.jar  -input /user/cloudera/input -output /user/cloudera/output_new5 -mapper smplMapper.py  -reducer smplReducer.py
+  124  history | grep rm
+  125  hdfs dfs -rm -r /user/cloudera/output*
+  126  hadoop jar /usr/lib/hadoop-mapreduce/hadoop-streaming.jar  -input /user/cloudera/input -output /user/cloudera/output_new -mapper /user/cloudera/smplMapper.py -reducer /user/cloudera/smplReducer.py -file `pwd`/smplMapper.py -file `pwd`/smplReducer.py
+  127  vi smplMapper.py 
+  128  which env
+  129  hdfs dfs -ls /usr/bin
+  130  hdfs dfs -ls /usr
+  131  hdfs dfs -ls /
+  132  ls /opt/cloudera/parcel-repo/
+  133  ls /usr/lib/hadoop-mapreduce/
+  134  ls /usr/lib/hadoop-mapreduce/*map*
+  135  history
+  136  ls /usr/lib/hadoop-mapreduce/*stream*
+  137  hadoop jar /usr/lib/hadoop-mapreduce/hadoop-streaming-2.6.0-cdh5.4.2.jar  -input /user/cloudera/input -output /user/cloudera/output_new -mapper /user/cloudera/smplMapper.py -reducer /user/cloudera/smplReducer.py -file `pwd`/smplMapper.py -file `pwd`/smplReducer.py
+  138  history  | grep rm
+  139  hdfs dfs -rm -r /user/cloudera/output*
+  140  hadoop jar /usr/lib/hadoop-mapreduce/hadoop-streaming-2.6.0-cdh5.4.2.jar  -input /user/cloudera/input -output /user/cloudera/output_new -mapper /user/cloudera/smplMapper.py -reducer /user/cloudera/smplReducer.py -file `pwd`/smplMapper.py -file `pwd`/smplReducer.py
+  141  hadoop jar /usr/lib/hadoop-mapreduce/hadoop-streaming-2.6.0-cdh5.4.2.jar  -input /user/cloudera/input -output /user/cloudera/output_new -mapper smplMapper.py -reducer smplReducer.py -file `pwd`/smplMapper.py -file `pwd`/smplReducer.py
+  142  hdfs dfs -rm -r /user/cloudera/output*
+  143  hadoop jar /usr/lib/hadoop-mapreduce/hadoop-streaming-2.6.0-cdh5.4.2.jar  -input /user/cloudera/input -output /user/cloudera/output_new -mapper smplMapper.py -reducer smplReducer.py -file `pwd`/smplMapper.py -file `pwd`/smplReducer.py
+  144  history
+  145  hdfs dfs -rm -r /user/cloudera/output*
+  146  hadoop jar /usr/lib/hadoop-mapreduce/hadoop-streaming-2.6.0-cdh5.4.2.jar  -input /user/cloudera/input -output /user/cloudera/output_new -mapper smplMapper.py -reducer smplReducer.py 
+  147  hdfs dfs -rm -r /user/cloudera/output*
+  148  hadoop jar /usr/lib/hadoop-mapreduce/hadoop-streaming-2.6.0-cdh5.4.2.jar  -input /user/cloudera/input -output /user/cloudera/output_new -mapper smplMapper.py -reducer smplReducer.py -file `pwd`/smplMapper.py -file `pwd`/smplReducer.py
+  149  history > mr.his
