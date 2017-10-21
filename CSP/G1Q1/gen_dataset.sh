@@ -39,7 +39,16 @@ do
 done
 
 echo 'File processed:' $n
-#hdfs dfs -copyFromLocal ./*.txt $dataset_dir
-#hdfs dfs -ls $dataset_dir
-#echo 'Files copied to HDFS, ready to run mapreduce.' 
+hdfs dfs -copyFromLocal ./*.txt $dataset_dir
+hdfs dfs -ls $dataset_dir
+
+hdfs dfs -test -d /T1/misc
+if [ $? == 0 ]; then
+	hadoop fs -rm -r /T1/misc
+fi 
+hadoop fs -mkdir -p /T1/misc
+echo " \t,;.?!-:@[](){}_*/" > delimiters.txt
+hadoop fs -copyFromLocal delimiters.txt /T1/misc
+
+echo 'Files copied to HDFS, ready to run mapreduce.' 
 cd $CURR_DIR
