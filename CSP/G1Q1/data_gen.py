@@ -30,8 +30,7 @@ def convert_data(csvfile, DEBUG=0):
 
     return 0 
 
-print "length is ", len(sys.argv), sys.argv
-
+#print "length is ", len(sys.argv), sys.argv
 data = open(sys.argv[1]) if len(sys.argv) > 1 else sys.stdin 
 
 convert_data(data)
