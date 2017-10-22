@@ -14,7 +14,7 @@ def convert_data(csvfile, DEBUG=0):
     			print(header)
     	else: 
     		colnum = 0 
-    		print  "%s,%s" % (row[13], row[20])
+    		print  "%s,%s" % (row[7], row[37])
     		
     
     		if DEBUG: 
@@ -33,7 +33,7 @@ def convert_data(csvfile, DEBUG=0):
 #print "length is ", len(sys.argv), sys.argv
 data = open(sys.argv[1]) if len(sys.argv) > 1 else sys.stdin 
 
-convert_data(data)
+convert_data(data, DEBUG=0)
 
 data.close() if len(sys.argv) > 1 else None
 

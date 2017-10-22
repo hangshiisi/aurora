@@ -1,16 +1,17 @@
 #!/usr/bin/env python
 
-from operator import itemgetter
-from collections import Counter
+#from operator import itemgetter
+from collections import defaultdict
+
 
 import sys
 
 NUMBERS = 10 
 
 current_word = None
-current_count = 0
+current_count = 0.0
 word = None
-my_counter = Counter() 
+my_counter = defaultdict(float) 
 
 # input comes from STDIN
 for line in sys.stdin:
@@ -22,7 +23,7 @@ for line in sys.stdin:
         # parse the input we got from mapper.py
         word, count = line.split(',', 1)
         #print "count, word", word, count
-        count = int(count)
+        count = float(count)
     except ValueError:
         # count was not a number, so silently
         # ignore/discard this line
@@ -45,6 +46,8 @@ if current_word == word:
     #print '%s,%s' % (current_word, current_count)
     my_counter[current_word] += current_count 
 
-for k, v in my_counter.most_common(NUMBERS): 
-    print '%s,%s' % (k, v)
+sorted_counter = sorted(my_counter.iteritems() , key= lambda (k, v):(v, k))
+
+for v in sorted_counter[:NUMBERS]: 
+    print("%s,%s"% (v[0],  v[1]))
 

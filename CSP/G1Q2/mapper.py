@@ -9,11 +9,11 @@ for line in sys.stdin:
         # remove leading and trailing whitespace
         line = line.strip()
         # split the line into words
-        (origin, dest) = line.split(',')
-        #print " old new ", origin, dest 
+        (airline, delay) = line.split(',')
+        #print " old new ", airline, delay
         
-        print '%s,1' % (origin)
-        print '%s,1' % (dest)
+        print '%s,%s' % (airline, delay)
+        
     except: #errors are going to make your job fail which you may or may not want
         continue
 
