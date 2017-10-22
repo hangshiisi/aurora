@@ -1,10 +1,7 @@
 #!/usr/bin/env python
 
-#from operator import itemgetter
 from collections import defaultdict
 import sys
-
-NUMBERS = 10 
 
 current_word = None
 current_count = 0
@@ -59,6 +56,6 @@ for k, v in my_value.items():
 
 sorted_values = sorted(my_value.iteritems() , key= lambda (k, v):(v, k))
 
-for v in sorted_values[:NUMBERS]: 
+for v in sorted_values: 
     print("%s,%s"% (v[0],  v[1]))
 
