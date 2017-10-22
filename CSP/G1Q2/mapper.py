@@ -12,7 +12,7 @@ for line in sys.stdin:
         (airline, delay) = line.split(',')
         #print " old new ", airline, delay
         
-        print '%s,%s' % (airline, delay)
+        print '%s,1,%s' % (airline, delay)
         
     except: #errors are going to make your job fail which you may or may not want
         continue

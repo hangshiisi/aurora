@@ -14,7 +14,7 @@ def convert_data(csvfile, DEBUG=0):
     			print(header)
     	else: 
     		colnum = 0 
-    		print  "%s,%s" % (row[7], row[37])
+    		print  "%s,%s" % (row[7], row[36])
     		
     
     		if DEBUG: 

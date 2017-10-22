@@ -70,7 +70,7 @@ done
 
 
 echo 'Number of files cleaned:' $n
-exit
+
 
 
 
