@@ -36,7 +36,7 @@ average_ontime = FOREACH group_by_origin_airline
 group_by_origin = GROUP average_ontime BY Origin; 
  
 top_ten_airlines = FOREACH group_by_origin {
-   sorted_airlines = ORDER average_ontime BY performance_index DESC;
+   sorted_airlines = ORDER average_ontime BY performance_index ASC;
    top_airlines = LIMIT sorted_airlines 10;
    GENERATE FLATTEN(top_airlines);
 }
