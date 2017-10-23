@@ -17,19 +17,21 @@
 --------------------------------------------------------------
 
 in  = LOAD '$PIG_IN_DIR' AS 
-          ( AirlineID:chararray,
-            Origin:chararray,
-            Carrier:chararray,
-            Dest:chararray,
-            DepDel15:int,
-            ArrDel15:int
+          ( AirlineID:chararray, --a8
+            Carrier:chararray,   --a9
+            Origin:chararray,    --a12       
+            Dest:chararray,      --a18
+            DepDelay:float,      --a26
+            DepDel15:float,      --a28
+            ArrDelay:float,      --a37 
+            ArrDel15:float       --a39
           );
 	
-group_by_origin_airline = GROUP in BY (Origin,Carrier, AirlineID);
+group_by_origin_airline = GROUP in BY (Origin, Carrier, AirlineID);
 
 average_ontime = FOREACH group_by_origin_airline 
                  GENERATE FLATTEN(group) AS (Origin, Carrier, AirlineID), 
-                          (int)((1-AVG(in.DepDel15))*100) AS performance_index;
+                          AVG(in.DepDelay) AS performance_index;
 
 group_by_origin = GROUP average_ontime BY Origin; 
  
@@ -39,9 +41,12 @@ top_ten_airlines = FOREACH group_by_origin {
    GENERATE FLATTEN(top_airlines);
 }
 
-X = FOREACH top_ten_airlines GENERATE TOTUPLE( TOTUPLE( 'origin',$0), TOTUPLE( 'carrier',$0), TOTUPLE('airline', $2 )), TOTUPLE($3);
+X = FOREACH top_ten_airlines GENERATE TOTUPLE( TOTUPLE( 'origin',$0), TOTUPLE( 'carrier',$1), TOTUPLE('airline', $2 )), TOTUPLE($3);
 
 --STORE X into 'cql://temp/t1g2q1?output_query=update%20t1g2q1%20set%20ontimeratio%20%3D%3F' USING CqlStorage();  
 
 STORE X into '$PIG_OUT_DIR';  -- write the results to a folder
 
+-----------------------------
+-----------------------------
+--pig -x local -param PIG_IN_DIR=/data/G2 -param PIG_OUT_DIR=/data/G2Q1 -f ./topairlines.pig >& result4.txt
