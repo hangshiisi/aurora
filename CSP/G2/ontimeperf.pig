@@ -20,7 +20,7 @@
 A = LOAD '$PIG_IN_DIR' USING org.apache.pig.piggybank.storage.CSVExcelStorage() AS 
 (a1, a2, a3, a4, a5,
  a6, a7, a8:chararray, a9:chararray, a10,
- a11, a12:chararray, a13, a14, a15,
+ a11:int, a12:chararray, a13, a14, a15,
  a16, a17, a18:chararray, a19, a20,
  a21, a22, a23, a24, a25,
  a26:float, a27, a28:float, a29, a30,
@@ -31,6 +31,7 @@ A = LOAD '$PIG_IN_DIR' USING org.apache.pig.piggybank.storage.CSVExcelStorage() 
 
 -- a8   AirlineID
 -- a9   Carrier
+-- a11  FlightNum
 -- a12  Origin
 -- a18  Dest
 -- a26  DepDelay
@@ -41,7 +42,7 @@ A = LOAD '$PIG_IN_DIR' USING org.apache.pig.piggybank.storage.CSVExcelStorage() 
 -- a44  Diverted
 	
 B = FILTER A by ( a28 is not null ) and ( a38 is not null ) and ( a42 == 0 ) and ( a44 == 0 ); 
-C = FOREACH B GENERATE a8, a9, a12, a18, a26, a28, a37, a39;  -- extract  
+C = FOREACH B GENERATE a8, a9, a11, a12, a18, a26, a28, a37, a39;  -- extract  
 
 STORE C into '$PIG_OUT_DIR';  -- write the results to a folder
 

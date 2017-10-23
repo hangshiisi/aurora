@@ -19,6 +19,7 @@
 in  = LOAD '$PIG_IN_DIR' AS 
           ( AirlineID:chararray, --a8
             Carrier:chararray,   --a9
+            FlightNum:int,       --a11 
             Origin:chararray,    --a12       
             Dest:chararray,      --a18
             DepDelay:float,      --a26

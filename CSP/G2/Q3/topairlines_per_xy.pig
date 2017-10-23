@@ -19,6 +19,7 @@
 in  = LOAD '$PIG_IN_DIR' AS 
           ( AirlineID:chararray, --a8
             Carrier:chararray,   --a9
+            FlightNum:int,       --a11
             Origin:chararray,    --a12       
             Dest:chararray,      --a18
             DepDelay:float,      --a26
@@ -35,12 +36,6 @@ average_ontime = FOREACH group_by_origin_dest_airline
                AVG(in.ArrDelay) AS performance_index;
 
 group_by_origin_dest = GROUP average_ontime BY (Origin, Dest);
-
-top_ten_airports = FOREACH group_by_origin {
-   sorted_airports = ORDER average_ontime BY performance_index ASC;
-   top_airports = LIMIT sorted_airports 10;
-   GENERATE FLATTEN(top_airports);
-}
 
 top_ten_airlines = FOREACH group_by_origin_dest {
    sorted_airlines = ORDER average_ontime BY performance_index ASC;

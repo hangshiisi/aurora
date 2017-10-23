@@ -86,7 +86,7 @@ pig -x local -param PIG_IN_DIR=${dataset_tmp} -param PIG_OUT_DIR=${pig_dir}\
 #pig -x local -param PIG_IN_DIR=${dataset_tmp} -param PIG_OUT_DIR=${pig_dir} -f ${CURR_DIR}/ontimeperf.pig 
 #pig -x local -param PIG_IN_DIR=/data/tmp_G2 -param PIG_OUT_DIR=/data/pigdata -f ./ontimeperf.pig 
 
-pig -x local -param PIG_IN_DIR=/data/tmp_G2 -param PIG_OUT_DIR=/data/pigdata -f ./ontimeperf.pig 
+#pig -x local -param PIG_IN_DIR=/data/tmp_G2 -param PIG_OUT_DIR=/data/pigdata -f ./ontimeperf.pig 
 
 if [ -f ${pig_dir}/_SUCCESS ]; then
    echo 'Files processed successfully.' $n
