@@ -56,4 +56,5 @@ STORE X into '$PIG_OUT_DIR';  -- write the results to a folder
  
 
 
---pig -x local -param PIG_IN_DIR=/data/G2 -param PIG_OUT_DIR=/data/G2Q1 -f ./topairlines.pig >& result4.txt
+--pig -x local -param PIG_IN_DIR=/data/pigdata -param PIG_OUT_DIR=/data/G2Q3 -f ./topairlines_per_xy.pig  >& result4.txt
+
