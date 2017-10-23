@@ -19,7 +19,7 @@
 in  = LOAD '$PIG_IN_DIR' AS 
           ( AirlineID:chararray, --a8
             Carrier:chararray,   --a9
-            FlightNum:int,        --a11
+            FlightNum:int,       --a11
             Origin:chararray,    --a12       
             Dest:chararray,      --a18
             DepDelay:float,      --a26
@@ -28,27 +28,18 @@ in  = LOAD '$PIG_IN_DIR' AS
             ArrDel15:float       --a39
           );
 	
-group_by_origin_dest_flight = GROUP in BY (Origin, Dest, FlightNum);
+group_by_origin_dest = GROUP in BY (Origin, Dest);
 
-
-average_ontime = FOREACH group_by_origin_dest_flight
-               GENERATE FLATTEN(group) AS (Origin, Dest, FlightNum),
+average_ontime = FOREACH group_by_origin_dest
+               GENERATE FLATTEN(group) AS (Origin, Dest),
                AVG(in.ArrDelay) AS performance_index;
 
-group_by_origin_dest = GROUP average_ontime BY (Origin, Dest);
-
-top_ten_airlines = FOREACH group_by_origin_dest {
-   sorted_flights = ORDER average_ontime BY performance_index ASC;
-   top_flights = LIMIT sorted_flights 10;
-   GENERATE FLATTEN(top_flights);
-}
-
-X = FOREACH top_ten_airlines GENERATE TOTUPLE( TOTUPLE('origin',$0), TOTUPLE('dest', $1),TOTUPLE('flightnum', $2)), TOTUPLE($3);
+--X = FOREACH average_ontime GENERATE TOTUPLE( TOTUPLE('origin',$0), TOTUPLE('dest', $1),TOTUPLE('avgDelay', $2));
 
 
 --STORE X into 'cql://temp/t1g2q1?output_query=update%20t1g2q1%20set%20ontimeratio%20%3D%3F' USING CqlStorage();  
 
-STORE X into '$PIG_OUT_DIR';  -- write the results to a folder
+STORE average_ontime into '$PIG_OUT_DIR';  -- write the results to a folder
 
 -----------------------------
 -----------------------------
