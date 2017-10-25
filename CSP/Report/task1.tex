@@ -1,33 +1,97 @@
-\documentclass{report}
+\documentclass[fontsize=11pt,paper=a4,pagesize=auto]{scrbook}
+
+\usepackage[english]{babel}
+\usepackage{microtype}
+\usepackage{blindtext}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{csquotes}
+
+
+\frenchspacing
  
 \begin{document}
-  
+\lstset{
+  language=C,
+  basicstyle=\small,
+  breaklines=true}
+    
   
 \tableofcontents{Report for Cloud Computing Captone Project Task 11}
 
 \section{Overview}
- This report covers the design and implementation details for Cloud Computing Captone Project Task 1. 
+This report covers the design and implementation details for Cloud Computing Captone Project Task 1. The goals of this task are to perform the following:
+\begin{itemize}
+\item Extract and clean the transportation dataset, and then store the result in HDFS.
+\item Answer 2 questions from Group 1, 3 questions from Group 2, and both questions from Group 3 using Hadoop. Store the results for questions from Group 2 and Question 3.2 in Cassandra.   
+\end{itemize}
  
 \section{Data Cleanup}
- 
-how to compile basic hello world into a pdf.
- 
-Write your favorite text editor create file and copy/paste the following (with hello.tex):
+\par The first task is to clean and store the dataset. We  first retrieve and extract the dataset from the EBS volume snapshot by following steps in \url{http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-restoring-volume.html}. One key thing to note is that we need to create EC2 instance in the same region and availabbility zone as the data EBS snapshot (snap-e1608d88 in us-east-1d).   
+\par Afterwards, we explore the data set and decide on how we wish to clean it. Then we ignore unrelated rows and extract only the columns from the csv files. The raw data is in \path{/data/aviation/airline_ontime}
+directory. 
+\par Two ways have been used to do the cleanup: 
+\begin{itemize} 
+\item A python script is developed on top of \href{https://docs.python.org/2/library/csv.html}{python CSV package} to achieve this. 
+\item Pig script, see \url{https://pig.apache.org/} for details. 
+\end{itemize}
+
+\par Such data cleanup is a one-time job and below are the fields we extract: 
+\begin{itemize}
+\item       AirlineID:chararray, --a8
+\item            Carrier:chararray,   --a9
+\item            FlightNum:int,       --a11
+\item            Origin:chararray,    --a12       
+\item            Dest:chararray,      --a18
+\item            DepDelay:float,      --a26
+\item            DepDel15:float,      --a28
+\item            ArrDelay:float,      --a37 
+\item            ArrDel15:float       --a39
+\end{itemize}
+
+\par The cleaned data are stored on HDFS via command hdfs dfs. 
+
+new paragraph
+
+
+
  
 \subsection{Output formats}
+\begin{figure}
+
+\fbox{\makebox(50,50){}}
+\caption{A dummy figure}
+\end{figure}
+
  
-different output formats (dvi, pdf)
- 
-The output of this command \$latex hello.tex will be a dvi 
-file (hello.dvi). This file (.dvi) can be converted by \$dvipdf 
-hello.dvi The get an pdf file from tex file, run this 
-command \$texi2pdf hello.tex
+\blindtext
  
  
 \section{Reserved Characters}
  
-The following symbols characters are reserved by LATEX because 
-they introduce a command and have a special meaning.
+
+\begin{tabular}{|p{6cm}|p{6cm}|}
+Option 1  &  Option  2  \\
+\begin{lstlisting}
+#include <stdio.h>
+
+int main()
+{
+  printf("Hello world\n");
+}
+\end{lstlisting}&
+\begin{lstlisting}
+#include <stdio.h>
+
+int main()
+{
+  printf("Hello world\n");
+}
+\end{lstlisting}
+
+\end{tabular} 
+
+
  
 \end{document}
 
