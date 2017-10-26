@@ -1,4 +1,4 @@
-\documentclass[fontsize=11pt,paper=a4,pagesize=auto]{scrbook}
+\documentclass[fontsize=11pt,paper=a4,pagesize=auto]{report}
 
 \usepackage[english]{babel}
 \usepackage{microtype}
@@ -36,15 +36,14 @@ This report covers the design and implementation details for Cloud Computing Cap
  
 \section{Data Cleanup}
 \par The first task is to clean and store the dataset. We  first retrieve and extract the dataset from the EBS volume snapshot by following steps in \url{http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-restoring-volume.html}. One key thing to note is that we need to create EC2 instance in the same region and availabbility zone as the data EBS snapshot (snap-e1608d88 in us-east-1d).   
-\par Afterwards, we explore the data set and decide on how we wish to clean it. Then we ignore unrelated rows and extract only the columns from the csv files. The raw data is in \path{/data/aviation/airline_ontime}
-directory. 
-\par Two ways have been used to do the cleanup: 
+\par Afterwards, we explore the data set and decide on how we wish to clean it. Then we ignore unrelated rows and extract only the columns from the csv files. The raw data is in \path{/data/aviation/airline_ontime} directory. 
+\par Approaches: Two ways have been used to do the cleanup: 
 \begin{itemize} 
 \item A python script is developed on top of \href{https://docs.python.org/2/library/csv.html}{python CSV package} to achieve this. 
 \item Pig script, see \url{https://pig.apache.org/} for details. 
 \end{itemize}
 
-\par Such data cleanup is a one-time job and below are the fields we extract: 
+\par Such data cleanup is a one-time job and below are the fields we extracted: 
 \begin{itemize}
 \item       AirlineID:chararray, --a8
 \item       Carrier:chararray,   --a9
@@ -57,11 +56,10 @@ directory.
 \item       ArrDel15:float       --a39
 \end{itemize}
 
-\par The cleaned data are stored on HDFS via command hdfs dfs. 
+\par The cleaned data are stored on HDFS via below hdfs dfs command  as tab delimetered fields with each line indicating one flight. 
 \begin{lstlisting}{centered}
 	hdfs dfs -copyFromLocal <local files> <hdfs dir>  
 \end{lstlisting}
-
  
 \section{System Overview}
 \subsection{Hadoop MapReduce}
@@ -92,6 +90,19 @@ int main()
  
 
 \blindtext
+
+\section{Optimization Techniques}
+ 
+
+\blindtext
+ 
+\section{Result Measurement}
+Correctness 
+
+Speed 
+
+Video clearly shows both of the following: 1) Ingesting and analyzing data in the systems; 2) Querying results.
+
 
  
 \end{document}
