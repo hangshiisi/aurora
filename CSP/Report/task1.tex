@@ -8,16 +8,24 @@
 \usepackage{csquotes}
 
 
-\frenchspacing
- 
-\begin{document}
 \lstset{
   language=C,
   basicstyle=\small,
   breaklines=true}
-    
-  
-\tableofcontents{Report for Cloud Computing Captone Project Task 11}
+\frenchspacing 
+\begin{document}
+
+\begin{titlepage}
+  \vspace*{1cm}
+  {\huge\raggedright Report of Captone Project Task 1\par}
+  \noindent\hrulefill\par
+  {\LARGE\raggedleft A Student in Coursera\par}
+  \vfill
+  {\Large\raggedleft 10/31/2017\par}
+\end{titlepage}
+
+%\tableofcontents{}
+
 
 \section{Overview}
 This report covers the design and implementation details for Cloud Computing Captone Project Task 1. The goals of this task are to perform the following:
@@ -39,58 +47,51 @@ directory.
 \par Such data cleanup is a one-time job and below are the fields we extract: 
 \begin{itemize}
 \item       AirlineID:chararray, --a8
-\item            Carrier:chararray,   --a9
-\item            FlightNum:int,       --a11
-\item            Origin:chararray,    --a12       
-\item            Dest:chararray,      --a18
-\item            DepDelay:float,      --a26
-\item            DepDel15:float,      --a28
-\item            ArrDelay:float,      --a37 
-\item            ArrDel15:float       --a39
+\item       Carrier:chararray,   --a9
+\item       FlightNum:int,       --a11
+\item       Origin:chararray,    --a12       
+\item       Dest:chararray,      --a18
+\item       DepDelay:float,      --a26
+\item       DepDel15:float,      --a28
+\item       ArrDelay:float,      --a37 
+\item       ArrDel15:float       --a39
 \end{itemize}
 
 \par The cleaned data are stored on HDFS via command hdfs dfs. 
-
-new paragraph
-
-
-
- 
-\subsection{Output formats}
-\begin{figure}
-
-\fbox{\makebox(50,50){}}
-\caption{A dummy figure}
-\end{figure}
-
- 
-\blindtext
- 
- 
-\section{Reserved Characters}
- 
-
-\begin{tabular}{|p{6cm}|p{6cm}|}
-Option 1  &  Option  2  \\
-\begin{lstlisting}
-#include <stdio.h>
-
-int main()
-{
-  printf("Hello world\n");
-}
-\end{lstlisting}&
-\begin{lstlisting}
-#include <stdio.h>
-
-int main()
-{
-  printf("Hello world\n");
-}
+\begin{lstlisting}{centered}
+	hdfs dfs -copyFromLocal <local files> <hdfs dir>  
 \end{lstlisting}
 
-\end{tabular} 
+ 
+\section{System Overview}
+\subsection{Hadoop MapReduce}
+The system is essentially a 4 node Apache Hadoop cluster with one namenode and three datanodes running on AWS EC2. 
+Hadoop Yarn runs and serves as the resource manager and application manager.
 
+\subsection{Cassandra} 
+Cassandra cluster is deployed on the three Hadoop datanodes to provide data replication and scalability. 
+The cluster run on the same rack and utilizes GossipingPropertyFileSnitch scheme. One of the nodes is assigned as the seed provider.
+ 
+\section{Group 1 Problems} 
+\begin{lstlisting}[language = C++]
+// include standard input/output stream objects:
+#include <iostream>
+// the main method:
+int main()
+{
+    std::cout << "Hello TeX world!" << std::endl;
+}
+\end{lstlisting}
+ 
+\section{Group 2 Problems}
+ 
+
+\blindtext
+
+\section{Group 3 Problems}
+ 
+
+\blindtext
 
  
 \end{document}
