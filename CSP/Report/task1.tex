@@ -64,7 +64,10 @@ This report covers the design and implementation details for Cloud Computing Cap
 \section{System Overview}
 \subsection{Hadoop MapReduce}
 The system is essentially a 4 node Apache Hadoop cluster with one namenode and three datanodes running on AWS EC2. 
-Hadoop Yarn runs and serves as the resource manager and application manager.
+Hadoop Yarn runs and serves as the resource manager and application manager. Below link provides some useful information on the setup: 
+
+\href{https://blog.insightdatascience.com/spinning-up-a-free-hadoop-cluster-step-by-step-c406d56bae42}{Spinning Up a Free Hadoop Cluster: Step by Step}
+
 
 \subsection{Cassandra} 
 Cassandra cluster is deployed on the three Hadoop datanodes to provide data replication and scalability. 
@@ -90,36 +93,128 @@ This is a similar problem as Problem 1.2. We use (weekday, delay) as input data.
  
 \section{Group 2 Problems}
  
- For each airport X, rank the top-10 carriers in decreasing order of on-time departure performance from X.
-For each airport X, rank the top-10 airports in decreasing order of on-time departure performance from X.
-For each source-destination pair X-Y, rank the top-10 carriers in decreasing order of on-time arrival performance at Y from X.
-For each source-destination pair X-Y, determine the mean arrival delay (in minutes) for a flight from X to Y.
+\begin{itemize} 
+\item For each airport X, rank the top-10 carriers in decreasing order of on-time departure performance from X.
 
+We use Pig Latin script to generate the results into HDFS files and then store them into Cassandra database for queries. Below is the script: 
 
-\blindtext
+\small\begin{verbatim}
+in  = LOAD '$PIG_IN_DIR' AS 
+          ( AirlineID:chararray, --a8
+            Carrier:chararray,   --a9
+            FlightNum:int,       --a11
+            Origin:chararray,    --a12       
+            Dest:chararray,      --a18
+            DepDelay:float,      --a26
+            DepDel15:float,      --a28
+            ArrDelay:float,      --a37 
+            ArrDel15:float       --a39
+          );
+	
+group_by_origin_airline = GROUP in BY (Origin, Carrier, AirlineID);
+
+average_ontime = FOREACH group_by_origin_airline 
+                 GENERATE FLATTEN(group) AS (Origin, Carrier, AirlineID), 
+                          AVG(in.DepDelay) AS performance_index;
+
+group_by_origin = GROUP average_ontime BY Origin; 
+ 
+top_ten_airlines = FOREACH group_by_origin {
+   sorted_airlines = ORDER average_ontime BY performance_index ASC;
+   top_airlines = LIMIT sorted_airlines 10;
+   GENERATE FLATTEN(top_airlines);
+}
+
+X = FOREACH top_ten_airlines GENERATE TOTUPLE( \
+TOTUPLE( 'origin',$0), TOTUPLE( 'carrier',$1),\
+TOTUPLE('airline', $2 )), TOTUPLE($3);
+
+STORE X into '$PIG_OUT_DIR'; 
+\end{verbatim}
+\normalsize
+
+\item For each airport X, rank the top-10 airports in decreasing order of on-time departure performance from X.
+
+Below is the PIG script (table loading part is ignored). 
+\small\begin{verbatim}
+group_by_origin_dest = GROUP in BY (Origin, Dest);
+
+average_ontime = FOREACH group_by_origin_dest 
+                 GENERATE FLATTEN(group) AS (Origin, Dest), 
+                          AVG(in.DepDelay) AS performance_index;
+
+group_by_origin = GROUP average_ontime BY Origin; 
+top_ten_airports = FOREACH group_by_origin {
+   sorted_airports = ORDER average_ontime BY performance_index ASC;
+   top_airports = LIMIT sorted_airports 10;
+   GENERATE FLATTEN(top_airports);
+}
+
+X = FOREACH top_ten_airports GENERATE TOTUPLE( \
+TOTUPLE( 'origin',$0), TOTUPLE('dest', $1 )), \
+TOTUPLE($2);
+
+STORE X into '$PIG_OUT_DIR'; 
+\end{verbatim}
+\normalsize
+
+\item For each source-destination pair X-Y, rank the top-10 carriers in decreasing order of on-time arrival performance at Y from X.
+
+Below is the PIG script (table loading part is ignored). 
+\small\begin{verbatim}
+group_by_origin_dest_airline = GROUP in BY (Origin, Dest, AirlineID);
+
+average_ontime = FOREACH group_by_origin_dest_airline
+               GENERATE FLATTEN(group) AS (Origin, Dest, AirlineID),
+               AVG(in.ArrDelay) AS performance_index;
+
+group_by_origin_dest = GROUP average_ontime BY (Origin, Dest);
+
+top_ten_airlines = FOREACH group_by_origin_dest {
+   sorted_airlines = ORDER average_ontime BY performance_index ASC;
+   top_airlines = LIMIT sorted_airlines 10;
+   GENERATE FLATTEN(top_airlines);
+}
+
+X = FOREACH top_ten_airlines GENERATE TOTUPLE( \
+TOTUPLE('origin',$0), TOTUPLE('dest', $1),TOTUPLE(\
+'airline', $2 )), TOTUPLE($3);
+
+STORE X into '$PIG_OUT_DIR';
+\end{verbatim}
+\normalsize
+
+%\item For each source-destination pair X-Y, determine the mean arrival delay (in minutes) for a flight from X to Y.
+
+\end{itemize}
 
 \section{Group 3 Problems}
- 
+\begin{itemize}
+\item 1. Does the popularity distribution of airports follow a Zipf distribution? If not, what distribution does it follow?
 
-\blindtext
+Zipf’s law stats that given some corpus or natural language utterances, the frequency of any word is inversely proportional to its rank in the frequency table. In our case it means that the airport with a higher rank should have a double number of flights compare with the next airport in rank. Even if from the Flights by Airport figure we can hope for a Zipf distribution, after
+doing a log-log plot we can see that Airports rank by number of flights is not following this distribution (log log for Zipf should be a straight line and is not). gnuplot tool is used to do plotting and it can be proven that this distribution is not Zipf but more a Lognormal one since the bottom half look very different than the top half. 
+
+
+
+\item 2. Tom wants to travel from airport X to airport Z. However, Tom also wants to stop at airport Y for some sightseeing on the way. More concretely, Tom has the following requirements (see Task 1 Queries for specific queries):
+\begin{itemize}
+\item A. The second leg of the journey (flight Y-Z) must depart two days after the first leg (flight X-Y). For example, if X-Y departs January 5, 2008, Y-Z must depart January 7, 2008.
+\item B. Tom wants his flights scheduled to depart airport X before 12:00 PM local time and to depart airport Y after 12:00 PM local time.
+\item C. Tom wants to arrive at each destination with as little delay as possible.
+\end{itemize}
+\end{itemize}
+
+
+
 
 \section{Optimization Techniques}
- 
+\begin{itemize}
+\item Removal of unused data columns: only needed columns have been imported from the original dataset, thus lowering the needs for data transfer and storage capacity.
+\item Data ordering and partitioning: the import script orders and partitions by date the data from the original dataset. This way the import process into HDFS is faster.
+\item Data preload into HDFS: data  is loaded to HDFS before starting to process it. This way, we can achieve persistent storage in HDFS and fast access from HDFS.
+\item One optimization is to use the combiner in the map phase in order to minimize the network traffic. This is used in problems in group 1. For example, in question 1, use same reducer class as combiner class. 
 
-\blindtext
- 
-\section{Result Measurement}
-Correctness 
-customized partition, so all outputs will be sent to one partition 
-
-
-Speed 
-
-Video clearly shows both of the following: 1) Ingesting and analyzing data in the systems; 2) Querying results.
-
-use combiners 
-
-
+\end{itemize} 
  
 \end{document}
-
