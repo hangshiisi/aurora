@@ -1,0 +1,18 @@
+ spark-submit --packages com.datastax.spark:spark-cassandra-connector_2.11:2.0.1 t1.py 
+ 
+ pyspark   --packages com.datastax.spark:spark-cassandra-connector_2.11:2.0.1
+
+  create keyspace test with replication = {'class':'SimpleStrategy', 'replication_factor':1};
+
+  use test;
+ 
+  create table kv (k text primary key, v text) ;  
+
+  insert into kv (k, v) values ('5', '5') ;
+  
+  insert into kv (k, v) values ('4', '41') ;
+
+  select count (*) from kv; 
+
+  cqlsh 0 9042 --cqlversion="3.4.2"
+ 
