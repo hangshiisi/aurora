@@ -6,7 +6,7 @@
 \usepackage{listings}
 \usepackage{hyperref}
 \usepackage{csquotes}
-
+\usepackage{graphicx}
 
 \lstset{
   language=C,
@@ -195,7 +195,13 @@ STORE X into '$PIG_OUT_DIR';
 Zipf’s law stats that given some corpus or natural language utterances, the frequency of any word is inversely proportional to its rank in the frequency table. In our case it means that the airport with a higher rank should have a double number of flights compare with the next airport in rank. Even if from the Flights by Airport figure we can hope for a Zipf distribution, after
 doing a log-log plot we can see that Airports rank by number of flights is not following this distribution (log log for Zipf should be a straight line and is not). gnuplot tool is used to do plotting and it can be proven that this distribution is not Zipf but more a Lognormal one since the bottom half look very different than the top half. 
 
+\begin{figure}
 
+\centering
+\includegraphics[totalheight=8cm]{airport_rank.png}
+\caption{used by Hang Shi.}
+\label{fig:verticalcell}
+\end{figure}
 
 \item 2. Tom wants to travel from airport X to airport Z. However, Tom also wants to stop at airport Y for some sightseeing on the way. More concretely, Tom has the following requirements (see Task 1 Queries for specific queries):
 \begin{itemize}
@@ -204,8 +210,6 @@ doing a log-log plot we can see that Airports rank by number of flights is not f
 \item C. Tom wants to arrive at each destination with as little delay as possible.
 \end{itemize}
 \end{itemize}
-
-
 
 
 \section{Optimization Techniques}
