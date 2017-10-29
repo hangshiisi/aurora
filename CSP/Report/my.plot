@@ -3,8 +3,8 @@ set output "my.png"
 set autoscale 
 
 set title "Popularity Distribution of Airports";
-set ylabel "Number of Passengers";
-set xlabel "Airports (Sorted by Passengers)";
+set ylabel "Rank of Airports";
+set xlabel "Airports Passengers";
 set key left top
 unset log y
 unset log x
