@@ -16,3 +16,4 @@
 
   cqlsh 0 9042 --cqlversion="3.4.2"
  
+cqlsh 0 9042 --cqlversion="3.4.2" -e "drop table if exists test.kv_copy ;  create table test.kv_copy (k text primary key, v text);"

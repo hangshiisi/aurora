@@ -36,8 +36,26 @@ test_df.write\
     .options(table="kv", keyspace="test")\
     .save()
 
+
 #verify the results 
-spark.read\
+copy_df = spark.read\
     .format("org.apache.spark.sql.cassandra")\
     .options(table="kv", keyspace="test")\
+    .load()
+
+copy_df.show()
+
+# need to have a way to create the table first 
+# either from cqlsh or codes 
+
+copy_df.write\
+    .format("org.apache.spark.sql.cassandra")\
+    .mode('overwrite')\
+    .options(table="kv_copy", keyspace="test")\
+    .save()
+
+print("after copying ")
+spark.read\
+    .format("org.apache.spark.sql.cassandra")\
+    .options(table="kv_copy", keyspace="test")\
     .load().show()
