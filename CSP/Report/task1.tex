@@ -1,4 +1,4 @@
-\documentclass[fontsize=11pt,paper=a4,pagesize=auto]{report}
+\documentclass[fontsize=11pt,paper=a4]{scrartcl}
 
 \usepackage[english]{babel}
 \usepackage{microtype}
@@ -13,18 +13,32 @@
   basicstyle=\small,
   breaklines=true}
 \frenchspacing 
+
+%%% Maketitle metadata
+\newcommand{\horrule}[1]{\rule{\linewidth}{#1}} 	
+
+\title{
+		%\vspace{-1in} 	
+		\usefont{OT1}{bch}{b}{n}
+		\normalfont \normalsize \textsc
+		{Coursera Course: Cloud Computing} \\ [25pt]
+		\horrule{0.5pt} \\[0.4cm]
+		\huge Capstone Project Task 1 Report \\
+		\horrule{2pt} \\[0.5cm]
+}
+\author{
+		\normalfont 								\normalsize
+        Hang Shi\\[-3pt]		\normalsize
+        \today
+}
+\date{}
+
+
 \begin{document}
 
-\begin{titlepage}
-  \vspace*{1cm}
-  {\huge\raggedright Report of Captone Project Task 1\par}
-  \noindent\hrulefill\par
-  {\LARGE\raggedleft A Student in Coursera\par}
-  \vfill
-  {\Large\raggedleft 10/31/2017\par}
-\end{titlepage}
 
-%\tableofcontents{}
+
+\maketitle
 
 
 \section{Overview}
@@ -196,10 +210,9 @@ Zipf’s law stats that given some corpus or natural language utterances, the fr
 doing a log-log plot we can see that Airports rank by number of flights is not following this distribution (log log for Zipf should be a straight line and is not). gnuplot tool is used to do plotting and it can be proven that this distribution is not Zipf but more a Lognormal one since the bottom half look very different than the top half. 
 
 \begin{figure}
-
 \centering
 \includegraphics[totalheight=8cm]{airport_rank.png}
-\caption{used by Hang Shi.}
+\caption{For poblem 3.1 Popularity Distribution of Airports.}
 \label{fig:verticalcell}
 \end{figure}
 
@@ -208,9 +221,10 @@ doing a log-log plot we can see that Airports rank by number of flights is not f
 \item A. The second leg of the journey (flight Y-Z) must depart two days after the first leg (flight X-Y). For example, if X-Y departs January 5, 2008, Y-Z must depart January 7, 2008.
 \item B. Tom wants his flights scheduled to depart airport X before 12:00 PM local time and to depart airport Y after 12:00 PM local time.
 \item C. Tom wants to arrive at each destination with as little delay as possible.
+It is solved by creating two MapReduce Jobs. One which filter the
+flights by arrival performance and the second one which computes the options Tom has and pick up the best one based on arrival performance. For the first map reduce the key is based on Origin, Destination and FlightDate. In the second MapReduce we will receive a list of best arrival flights grouped by Origin-Destination-Date and from here using the 12h departure condition we can generate for each day all the options Tom has.
 \end{itemize}
 \end{itemize}
-
 
 \section{Optimization Techniques}
 \begin{itemize}
@@ -221,4 +235,7 @@ doing a log-log plot we can see that Airports rank by number of flights is not f
 
 \end{itemize} 
  
+\section{Video Link}
+To be added later. 
+
 \end{document}
