@@ -7,7 +7,15 @@
   use test;
  
   create table kv (k text primary key, v text) ;  
-  create table g2q1 (origin text, carrier text, flight text, performance text, primary key (origin, performance))
+  
+
+  create table g2q1 (origin text, carrier text, flight text, performance text, primary key (origin, performance)); 
+  
+  create table g2q2 (origin text, destination text,  performance text, primary key (origin, destination, performance)) ;
+
+  create table g2q3 (origin text, destination text, performance text, airline text, primary key (origin, destination, performance));
+
+
 
   insert into kv (k, v) values ('5', '5') ;
   

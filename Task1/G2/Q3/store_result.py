@@ -20,12 +20,12 @@ spark = SparkSession \
 # write something 
 #test_data = spark.read.csv("f.csv", header=False) 
 #use local file "file://<file path>"
-test_data = spark.sparkContext.textFile("q2.csv").map(\
+test_data = spark.sparkContext.textFile("q3.csv").map(\
                     lambda l: l.strip().split("\t"))
 #.map(\
 #                    lambda p: [str(uuid.uuid1())] + p) 
 #test_df = test_data.toDF(['uuid', 'origin','carrier', 'flight', 'performance']) 
-test_df = test_data.toDF(['origin','performance',  'destination']) 
+test_df = test_data.toDF(['origin','destination',  'performance', 'airline']) 
 
 
 #kk = test_df.collect()
@@ -35,7 +35,7 @@ test_df = test_data.toDF(['origin','performance',  'destination'])
 test_df.write\
     .format("org.apache.spark.sql.cassandra")\
     .mode('append')\
-    .options(table="g2q2", keyspace="test")\
+    .options(table="g2q3", keyspace="test")\
     .save()
 
 
