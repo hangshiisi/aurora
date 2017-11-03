@@ -26,7 +26,9 @@ fi
 CURR_DIR=${PWD}
 tmp_dir=/tmp/${question}
 pig_dir=${tmp_dir}/pigdata
-rm -r $tmp_dir
+if [ -d $tmp_dir ]; then 
+   rm -r $tmp_dir
+fi 
 mkdir $tmp_dir
 cp data_gen.py $tmp_dir 
 cd $tmp_dir

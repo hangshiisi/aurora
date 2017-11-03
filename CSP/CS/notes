@@ -7,6 +7,7 @@
   use test;
  
   create table kv (k text primary key, v text) ;  
+  create table g2q1 (origin text, carrier text, flight text, performance text, primary key (origin, performance))
 
   insert into kv (k, v) values ('5', '5') ;
   
@@ -17,3 +18,55 @@
   cqlsh 0 9042 --cqlversion="3.4.2"
  
 cqlsh 0 9042 --cqlversion="3.4.2" -e "drop table if exists test.kv_copy ;  create table test.kv_copy (k text primary key, v text);"
+
+
+
+cqlsh:test> select count(*) from g2q1; 
+
+ count
+-------
+  2066
+
+(1 rows)
+
+
+Warnings :
+Aggregation query used without partition key
+
+
+cqlsh:test> select carrier, flight, performance from g2q1 where origin='MIA' order by performance;
+
+ carrier | flight | performance
+---------+--------+---------------------
+      9E |  20363 | -3.6666666666666665
+      EV |  20366 |  1.2026431718061674
+      RU |  20374 |  1.2834285714285714
+      TZ |  20312 |   1.782243551289742
+      XE |  20374 |   2.745644599303136
+      PA |  20384 |  4.0265078920734725
+      NW |  19386 |   4.423477675861051
+      US |  20355 |   5.990861974904528
+      UA |  19977 |   6.808275094316285
+      ML |  20295 |   7.512145748987854
+
+
+
+
+cqlsh:test> select carrier, flight, performance from g2q1 where origin='BWI' order by performance;
+
+ carrier | flight | performance
+---------+--------+--------------------
+      F9 |  20436 | 0.7464929859719439
+      PA |  20384 |  4.761904761904762
+      CO |  19704 |  5.113806228906936
+      YV |  20378 |  5.504665629860031
+      NW |  19386 |  5.655729477085228
+      AL |  20355 |  5.728207236842105
+      AA |  19805 |  5.913443851481776
+      9E |  20363 |        7.220703125
+      US |  20355 |  7.471461796641799
+      DL |  19790 |   7.64112716551741
+
+
+
+

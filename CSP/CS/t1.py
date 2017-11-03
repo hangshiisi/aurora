@@ -23,8 +23,9 @@ spark.read\
 
 # write something 
 #test_data = spark.read.csv("f.csv", header=False) 
+#use local file "file://<file path>"
 test_data = spark.sparkContext.textFile("f.csv").map(\
-                    lambda l: l.strip().split(",")) 
+                    lambda l: l.strip().split("\t")) 
 test_df = test_data.toDF(['k','v']) 
 
 test_df.show() 
