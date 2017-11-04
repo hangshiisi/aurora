@@ -9,13 +9,17 @@
   create table kv (k text primary key, v text) ;  
   
 
-  create table g2q1 (origin text, carrier text, flight text, performance text, primary key (origin, performance)); 
+  create table g2q1 (origin text, carrier text, airline text, performance float, primary key (origin,  performance)); 
   
-  create table g2q2 (origin text, destination text,  performance text, primary key (origin, destination, performance)) ;
+  create table g2q2 (origin text, destination text,  performance float, primary key (origin, performance)) ;
 
-  create table g2q3 (origin text, destination text, performance text, airline text, primary key (origin, destination, performance));
+  create table g2q3 (origin text, destination text, performance float, airline text, primary key (origin, destination, performance));
 
-
+  CREATE TABLE g2q4 (
+    origin text,
+    destination text,
+    delay text,
+    PRIMARY KEY ((origin, destination), delay) );  
 
   insert into kv (k, v) values ('5', '5') ;
   
@@ -29,52 +33,78 @@ cqlsh 0 9042 --cqlversion="3.4.2" -e "drop table if exists test.kv_copy ;  creat
 
 
 
-cqlsh:test> select count(*) from g2q1; 
-
- count
--------
-  2066
-
-(1 rows)
 
 
-Warnings :
-Aggregation query used without partition key
+cqlsh 0 9042 --cqlversion="3.4.2"
+
+use test; 
+
+describe g2q1; 
+
+select origin, carrier, airline, performance from g2q1 where origin='MIA' order by performance;
+
+select origin, carrier, airline, performance from g2q1 where origin='BWI' order by performance;
 
 
-cqlsh:test> select carrier, flight, performance from g2q1 where origin='MIA' order by performance;
+describe g2q2; 
 
- carrier | flight | performance
----------+--------+---------------------
-      9E |  20363 | -3.6666666666666665
-      EV |  20366 |  1.2026431718061674
-      RU |  20374 |  1.2834285714285714
-      TZ |  20312 |   1.782243551289742
-      XE |  20374 |   2.745644599303136
-      PA |  20384 |  4.0265078920734725
-      NW |  19386 |   4.423477675861051
-      US |  20355 |   5.990861974904528
-      UA |  19977 |   6.808275094316285
-      ML |  20295 |   7.512145748987854
+select  origin, destination, performance from g2q2 where origin='BWI' order by performance ASC;
+select  origin, destination, performance from g2q2 where origin='MIA' order by performance ASC;
+
+
+describe g2q3; 
+select  origin, destination, performance, airline from g2q3 where origin='IND' and destination='CMH' order by performance ASC;
+
+select  origin, destination, performance, airline from g2q3 where origin='LAX' and destination='SFO' order by performance ASC;
 
 
 
+describe g2q4: 
+select  origin, destination, delay from g2q4 where origin='CMI' and destination='ORD' order by delay ASC;
 
-cqlsh:test> select carrier, flight, performance from g2q1 where origin='BWI' order by performance;
-
- carrier | flight | performance
----------+--------+--------------------
-      F9 |  20436 | 0.7464929859719439
-      PA |  20384 |  4.761904761904762
-      CO |  19704 |  5.113806228906936
-      YV |  20378 |  5.504665629860031
-      NW |  19386 |  5.655729477085228
-      AL |  20355 |  5.728207236842105
-      AA |  19805 |  5.913443851481776
-      9E |  20363 |        7.220703125
-      US |  20355 |  7.471461796641799
-      DL |  19790 |   7.64112716551741
+select  origin, destination, delay from g2q4 where origin='LAX' and destination='SFO' order by delay ASC;
 
 
 
 
+#Group 3, Question 2
+
+CREATE TABLE test.g3q2 (
+    fdate text,
+    forigin text,
+    fto text,
+    sto text,
+    arrival text,
+    carrier text,
+    depart text,
+    flight int,
+    number int,
+    scarrier text,
+    PRIMARY KEY (fdate, forigin, fto, sto)
+); 
+
+"""
+
+describe g3q2: 
+
+select * from g3q2 where forigin = 'SLC' and sto = 'BFL' and fdate = '2008-01-06' and number = '1200';
+
+select * from g3q2 where forigin = 'JAX' and sto = 'DFW' and fdate = '2008-09-09' and number = '1200';
+
+
+"""
+
+
+#Group 3, Question 1
+tree
+cat g3q1.sh 
+cat setup/gen_dataset.sh 
+cat setup/airport.pig 
+
+cd output
+
+cat exchange.py 
+./exchange.py part-r-00000 > new_data 
+cat my.plot
+
+gnuplot my.plot 

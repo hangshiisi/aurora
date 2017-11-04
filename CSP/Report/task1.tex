@@ -87,6 +87,8 @@ Hadoop Yarn runs and serves as the resource manager and application manager. Bel
 Cassandra cluster is deployed on the three Hadoop datanodes to provide data replication and scalability. 
 The cluster run on the same rack and utilizes GossipingPropertyFileSnitch scheme. One of the nodes is assigned as the seed provider.
  
+ 
+ 
 \section{Group 1 Problems} 
 
 \begin{itemize} 
@@ -204,7 +206,7 @@ STORE X into '$PIG_OUT_DIR';
 
 \section{Group 3 Problems}
 \begin{itemize}
-\item 1. Does the popularity distribution of airports follow a Zipf distribution? If not, what distribution does it follow?
+\item Problem 3.1. Does the popularity distribution of airports follow a Zipf distribution? If not, what distribution does it follow?
 
 Zipf’s law stats that given some corpus or natural language utterances, the frequency of any word is inversely proportional to its rank in the frequency table. In our case it means that the airport with a higher rank should have a double number of flights compare with the next airport in rank. Even if from the Flights by Airport figure we can hope for a Zipf distribution, after
 doing a log-log plot we can see that Airports rank by number of flights is not following this distribution (log log for Zipf should be a straight line and is not). gnuplot tool is used to do plotting and it can be proven that this distribution is not Zipf but more a Lognormal one since the bottom half look very different than the top half. 
@@ -216,7 +218,7 @@ doing a log-log plot we can see that Airports rank by number of flights is not f
 \label{fig:verticalcell}
 \end{figure}
 
-\item 2. Tom wants to travel from airport X to airport Z. However, Tom also wants to stop at airport Y for some sightseeing on the way. More concretely, Tom has the following requirements (see Task 1 Queries for specific queries):
+\item Problem 3.2. Tom wants to travel from airport X to airport Z. However, Tom also wants to stop at airport Y for some sightseeing on the way. More concretely, Tom has the following requirements (see Task 1 Queries for specific queries):
 \begin{itemize}
 \item A. The second leg of the journey (flight Y-Z) must depart two days after the first leg (flight X-Y). For example, if X-Y departs January 5, 2008, Y-Z must depart January 7, 2008.
 \item B. Tom wants his flights scheduled to depart airport X before 12:00 PM local time and to depart airport Y after 12:00 PM local time.
@@ -235,7 +237,11 @@ flights by arrival performance and the second one which computes the options Tom
 
 \end{itemize} 
  
-\section{Video Link}
-To be added later. 
+\section{Code and Code Location}
+\begin{itemize}
+\item \url{https://github.com/myhangshi/ccompute}
+\item \url{https://vimeo.com/241272936}
+\end{itemize} 
+ 
 
 \end{document}

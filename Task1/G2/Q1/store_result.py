@@ -25,7 +25,7 @@ test_data = spark.sparkContext.textFile("result.csv").map(\
 #.map(\
 #                    lambda p: [str(uuid.uuid1())] + p) 
 #test_df = test_data.toDF(['uuid', 'origin','carrier', 'flight', 'performance']) 
-test_df = test_data.toDF(['origin','carrier', 'flight', 'performance']) 
+test_df = test_data.toDF(['origin','carrier', 'airline', 'performance']) 
 
 
 #kk = test_df.collect()
