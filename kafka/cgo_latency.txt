@@ -1,0 +1,198 @@
+package main
+
+import "fmt"
+import "time"
+import "math/rand"
+
+// #include <stdio.h>
+// #include <stdlib.h>
+import "C"
+
+func Random() int {
+return int(C.random())
+}
+
+func main() {
+t0 := time.Now()
+fmt.Println("Hello, ??")
+t1 := time.Now()
+dur := t1.Sub(t0)
+fmt.Printf(" t0 %v \n", t0)
+fmt.Printf(" t1 %v dur %v \n", t1, dur)
+t2 := time.Now()
+x := 100
+for i := 1; i < 1000; i++ {
+x = x + 1
+}
+t3 := time.Now()
+dur2 := t3.Sub(t2)
+c_rand := Random()
+fmt.Printf(" x %v, c_rand: %v, dur2: %v \n", x, c_rand, dur2)
+t4 := time.Now()
+for i := 1; i < 1000; i++ {
+x = x + 1
+c_rand = Random()
+                // c_rand = int(C.random())
+}
+t5 := time.Now()
+dur3 := t5.Sub(t4)
+fmt.Printf(" x %v, c_rand: %v, dur3: %v \n", x, c_rand, dur3)
+r := rand.New(rand.NewSource(99))
+t6 := time.Now()
+for i := 1; i < 1000; i++ {
+x = x + 1
+c_rand = r.Intn(10000000000)
+}
+t7 := time.Now()
+dur4 := t7.Sub(t6)
+fmt.Printf(" x %v, c_rand: %v, dur4: %v \n", x, c_rand, dur4)
+}
+
+
+
+package main
+
+import "fmt"
+import "time"
+import "math/rand"
+
+// #include <stdio.h>
+// #include <stdlib.h>
+import "C"
+
+func Random() int {
+return int(C.random())
+}
+
+func main() {
+t0 := time.Now()
+fmt.Println("Hello, ??")
+t1 := time.Now()
+dur := t1.Sub(t0)
+fmt.Printf(" t0 %v \n", t0)
+fmt.Printf(" t1 %v dur %v \n", t1, dur)
+t2 := time.Now()
+x := 100
+for i := 1; i < 1000; i++ {
+x = x + 1
+}
+t3 := time.Now()
+dur2 := t3.Sub(t2)
+c_rand := Random()
+fmt.Printf(" x %v, c_rand: %v, dur2: %v \n", x, c_rand, dur2)
+t4 := time.Now()
+for i := 1; i < 1000; i++ {
+x = x + 1
+c_rand = Random()
+                // c_rand = int(C.random())
+}
+t5 := time.Now()
+dur3 := t5.Sub(t4)
+fmt.Printf(" x %v, c_rand: %v, dur3: %v \n", x, c_rand, dur3)
+r := rand.New(rand.NewSource(99))
+t6 := time.Now()
+for i := 1; i < 1000; i++ {
+x = x + 1
+c_rand = r.Intn(10000000000)
+}
+t7 := time.Now()
+dur4 := t7.Sub(t6)
+fmt.Printf(" x %v, c_rand: %v, dur4: %v \n", x, c_rand, dur4)
+}
+
+
+>>>>>>>>>>>>>>>>> Result >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+
+
+
+
+
+
+ytang@ytang-dell:~/projects/GO/ytang_go$ ls
+latency.go
+ytang@ytang-dell:~/projects/GO/ytang_go$ go run latency.go 
+Hello, ??
+ t0 2017-11-08 14:56:13.176186693 -0800 PST 
+ t1 2017-11-08 14:56:13.176196167 -0800 PST dur 9.474µs 
+>>>>>>>>>>>>>> 1000 loop >>>>>>>>>>>>>>>>>>>>>>>
+
+ytang@ytang-dell:~/projects/GO/ytang_go$ go run latency.go 
+Hello, ??
+ t0 2017-11-08 15:10:33.347847717 -0800 PST 
+ t1 2017-11-08 15:10:33.347858727 -0800 PST dur 11.01µs 
+ x 1099, c_rand: 1804289383, dur2: 353ns 
+ x 2098, c_rand: 1143565421, dur3: 75.111µs 
+ x 3097, c_rand: 1936323172, dur4: 25.232µs 
+ytang@ytang-dell:~/projects/GO/ytang_go$ go run latency.go 
+Hello, ??
+ t0 2017-11-08 15:10:37.606452298 -0800 PST 
+ t1 2017-11-08 15:10:37.606461243 -0800 PST dur 8.945µs 
+ x 1099, c_rand: 1804289383, dur2: 346ns 
+ x 2098, c_rand: 1143565421, dur3: 108.148µs 
+ x 3097, c_rand: 1936323172, dur4: 52.444µs 
+ytang@ytang-dell:~/projects/GO/ytang_go$ go run latency.go 
+Hello, ??
+ t0 2017-11-08 15:10:41.234696575 -0800 PST 
+ t1 2017-11-08 15:10:41.234705708 -0800 PST dur 9.133µs 
+ x 1099, c_rand: 1804289383, dur2: 352ns 
+ x 2098, c_rand: 1143565421, dur3: 94.314µs 
+ x 3097, c_rand: 1936323172, dur4: 25.979µs 
+ytang@ytang-dell:~/projects/GO/ytang_go$ 
+
+
+>>>>>>>>>>>>>>>>> 10000 loop >>>>>>>>>>>>>>>>>>>>>>>>
+
+ytang@ytang-dell:~/projects/GO/ytang_go$ go run latency.go 
+Hello, ??
+ t0 2017-11-08 15:00:17.674807125 -0800 PST 
+ t1 2017-11-08 15:00:17.674816185 -0800 PST dur 9.06µs 
+ x 10099, c_rand: 1804289383, dur2: 3.022µs 
+ x 20098, c_rand: 1908609430, dur3: 789.381µs 
+ x 30097, c_rand: 3827157927, dur4: 267.467µs 
+ytang@ytang-dell:~/projects/GO/ytang_go$ go run latency.go 
+Hello, ??
+ t0 2017-11-08 15:00:25.787115632 -0800 PST 
+ t1 2017-11-08 15:00:25.787126185 -0800 PST dur 10.553µs 
+ x 10099, c_rand: 1804289383, dur2: 3.855µs 
+ x 20098, c_rand: 1908609430, dur3: 778.631µs 
+ x 30097, c_rand: 3827157927, dur4: 263.608µs 
+ytang@ytang-dell:~/projects/GO/ytang_go$ go run latency.go 
+Hello, ??
+ t0 2017-11-08 15:00:35.689499543 -0800 PST 
+ t1 2017-11-08 15:00:35.689508677 -0800 PST dur 9.134µs 
+ x 10099, c_rand: 1804289383, dur2: 2.959µs 
+ x 20098, c_rand: 1908609430, dur3: 774.564µs 
+ x 30097, c_rand: 3827157927, dur4: 286.626µs 
+ytang@ytang-dell:~/projects/GO/ytang_go$ go run latency.go 
+Hello, ??
+ t0 2017-11-08 15:00:59.817380488 -0800 PST 
+ t1 2017-11-08 15:00:59.817407388 -0800 PST dur 26.9µs 
+ x 10099, c_rand: 1804289383, dur2: 3.042µs 
+ x 20098, c_rand: 1908609430, dur3: 766.328µs 
+ x 30097, c_rand: 3827157927, dur4: 288.12µs 
+ytang@ytang-dell:~/projects/GO/ytang_go$ go run latency.go 
+Hello, ??
+ t0 2017-11-08 15:01:01.530095474 -0800 PST 
+ t1 2017-11-08 15:01:01.53010417 -0800 PST dur 8.696µs 
+ x 10099, c_rand: 1804289383, dur2: 3.048µs 
+ x 20098, c_rand: 1908609430, dur3: 775.536µs 
+ x 30097, c_rand: 3827157927, dur4: 256.028µs 
+ytang@ytang-dell:~/projects/GO/ytang_go$ 
+ytang@ytang-dell:~/projects/GO/ytang_go$ 
+
+ >>>>>>>>>>>> 1000,000 loop >>>>>>>>>>>>>>>>>>>>>>>
+
+ytang@ytang-dell:~/projects/GO/ytang_go$ go run latency.go 
+Hello, ??
+ t0 2017-11-08 15:03:04.154396959 -0800 PST 
+ t1 2017-11-08 15:03:04.154406191 -0800 PST dur 9.232µs 
+ x 10099, c_rand: 1804289383, dur2: 3.05µs 
+ x 1010098, c_rand: 429357853, dur3: 74.221967ms 
+ x 2010097, c_rand: 5152698193, dur4: 24.852404ms 
+ytang@ytang-dell:~/projects/GO/ytang_go$ 
+
+
+
+
