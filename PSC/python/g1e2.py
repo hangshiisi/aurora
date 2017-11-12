@@ -26,9 +26,11 @@ def close_handler(signal, frame):
 
 def print_rdd(rdd):
     print('==========XYZ S===================')
-    airlines = rdd.takeOrdered(10, key = lambda x: -x[1][0]/airline[1][1])
+    #airlines = rdd.takeOrdered(10, key = lambda x: -x[1][0]/airline[1][1])
+    airlines = rdd.takeOrdered(10, key = lambda (x,y): -y[1]/y[0])
+ 
     for airline in airlines:
-        print("%s,%s, %f,%d" % (airline[0][0], airline[0][1], \
+        print("%s, %f,%d" % (airline[0], \
                airline[1][0]/airline[1][1], airline[1][1]))
     print('==========XYZ E===================')
 
@@ -59,7 +61,7 @@ def updateFunction(newValues, runningCount):
     return (values, counter) 
 
 filtered = lines.map(lambda line: line.split("\t"))\
-        		.map(lambda word: ((word[0], word[1]), (float(word[7]), 1)) )\
+        		.map(lambda word: (word[0]+" " + word[1], (float(word[7]), 1)) )\
         		.updateStateByKey(updateFunction)
                 
 filtered.foreachRDD(lambda rdd: print_rdd(rdd))
