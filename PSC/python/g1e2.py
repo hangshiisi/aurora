@@ -2,6 +2,7 @@ from pyspark import SparkContext
 from pyspark import SparkConf
 from pyspark.streaming import StreamingContext
 from pyspark.streaming.kafka import KafkaUtils
+from pyspark.sql import SQLContext, Row
 
 import sys
 import time
@@ -24,14 +25,35 @@ def close_handler(signal, frame):
 		pass 	
 	sys.exit(0)	 
 
+def getSqlContextInstance(sparkContext):
+    if ('sqlContextSingletonInstance' not in globals()):
+        globals()['sqlContextSingletonInstance'] = SQLContext(sparkContext)
+    return globals()['sqlContextSingletonInstance']
+
+
 def print_rdd(rdd):
     print('==========XYZ S===================')
+        # Get the singleton instance of SQLContext
+    if rdd.isEmpty(): 
+        return 
+
+    sqlContext = getSqlContextInstance(rdd.context)
+   
+    dataFrame = sqlContext.createDataFrame(rdd,  
+                    "carrier:string, delay:float, total:int")
+    dataFrame.show() 
+    dataFrame.registerTempTable("carrier_delays")
+    # Do word count on table using SQL and print it
+    carrier_delays_df = \
+                sqlContext.sql("SELECT carrier, delay/total AS avg_delay FROM \
+                    carrier_delays  ORDER BY avg_delay ASC LIMIT 10")
+    carrier_delays_df.show()
+
     #airlines = rdd.takeOrdered(10, key = lambda x: -x[1][0]/airline[1][1])
-    airlines = rdd.takeOrdered(10, key = lambda (x,y): -y[1]/y[0])
- 
-    for airline in airlines:
-        print("%s, %f,%d" % (airline[0], \
-               airline[1][0]/airline[1][1], airline[1][1]))
+    airlines = rdd.takeOrdered(10, key = lambda (x,y, z): float(z)/float(y))
+
+    for (x, y, z) in airlines:
+        print("%s, %f,%d" % (x, y/z, z))
     print('==========XYZ E===================')
 
 
@@ -62,8 +84,10 @@ def updateFunction(newValues, runningCount):
 
 filtered = lines.map(lambda line: line.split("\t"))\
         		.map(lambda word: (word[0]+" " + word[1], (float(word[7]), 1)) )\
-        		.updateStateByKey(updateFunction)
-                
+        		.updateStateByKey(updateFunction)\
+                .map(lambda (x, y): (x, float(y[0]), int(y[1])) )
+
+
 filtered.foreachRDD(lambda rdd: print_rdd(rdd))
 
 # start streaming process
