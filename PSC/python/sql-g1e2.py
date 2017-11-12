@@ -2,6 +2,7 @@ from pyspark import SparkContext
 from pyspark import SparkConf
 from pyspark.streaming import StreamingContext
 from pyspark.streaming.kafka import KafkaUtils
+from pyspark.sql import SQLContext, Row
 
 import sys
 import time
@@ -24,12 +25,12 @@ def close_handler(signal, frame):
 		pass 	
 	sys.exit(0)	 
 
-def print_rdd(rdd):
-    print('==========XYZ S===================')
-    airports = rdd.takeOrdered(10, key = lambda x: -x[1])
-    for airport in airports:
-        print("%s,%d" % (airport[0], airport[1]))
-    print('==========XYZ E===================')
+def getSqlContextInstance(sparkContext):
+    if ('sqlContextSingletonInstance' not in globals()):
+        globals()['sqlContextSingletonInstance'] = SQLContext(sparkContext)
+    return globals()['sqlContextSingletonInstance']
+    
+
 
 config.set('spark.streaming.stopGracefullyOnShutdown', True)
 
@@ -47,16 +48,24 @@ zkQuorum, topic = sys.argv[1:]
 kvs = KafkaUtils.createStream(ssc, zkQuorum, "spark-streaming-consumer", {topic: 1})
 lines = kvs.map(lambda x: x[1])
 
-def updateFunction(newValues, runningCount):
-        return sum(newValues, runningCount or 0)
+def process(time, rdd):
+    print("========= %s =========" % str(time))
+    try:
+        # Get the singleton instance of SQLContext
+        sqlContext = getSqlContextInstance(rdd.context)
+        # Convert RDD[String] to RDD[Row] to DataFrame
+        parts = rdd.map(lambda line: line.split("\t"))
+        delays= parts.map(lambda w: Row(carrier=w[0], delay=float(w[7])))
+        dataFrame = sqlContext.createDataFrame(delays)
+        # Register as table
+        dataFrame.registerTempTable("carrier_delays")
+        # Do word count on table using SQL and print it
+        carrier_delays_df = \
+                sqlContext.sql("SELECT carrier, avg(delay) AS avg_delay FROM carrier_delays GROUP BY carrier ORDER BY avg_delay ASC LIMIT 10")
+        carrier_delays_df.show()
+    except Exception as e: print (e)
 
-filtered = lines.map(lambda line: line.split("\t"))\
-        		.flatMap(lambda word: [(word[3], 1), (word[4], 1)] if len(word) > 4 else [] )\
-        		.reduceByKey(lambda a, b: a+b)\
-                .updateStateByKey(updateFunction)\
-                .transform(lambda rdd: rdd.sortBy(lambda (word, count): -count))
-
-filtered.foreachRDD(lambda rdd: print_rdd(rdd))
+lines.foreachRDD(process)
 
 # start streaming process
 ssc.start()

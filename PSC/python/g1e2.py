@@ -26,10 +26,12 @@ def close_handler(signal, frame):
 
 def print_rdd(rdd):
     print('==========XYZ S===================')
-    airports = rdd.takeOrdered(10, key = lambda x: -x[1])
-    for airport in airports:
-        print("%s,%d" % (airport[0], airport[1]))
+    airlines = rdd.takeOrdered(10, key = lambda x: -x[1][0]/airline[1][1])
+    for airline in airlines:
+        print("%s,%s, %f,%d" % (airline[0][0], airline[0][1], \
+               airline[1][0]/airline[1][1], airline[1][1]))
     print('==========XYZ E===================')
+
 
 config.set('spark.streaming.stopGracefullyOnShutdown', True)
 
@@ -37,25 +39,29 @@ config.set('spark.streaming.stopGracefullyOnShutdown', True)
 signal.signal(signal.SIGINT, close_handler)
 
 
-sc = SparkContext(appName='g1ex1', conf=config)
+sc = SparkContext(appName='g1ex2', conf=config)
 ssc = StreamingContext(sc, 10)
-ssc.checkpoint('file:///tmp/g1ex1')
-
-#lines = ssc.socketTextStream(sys.argv[1], int(sys.argv[2]))
+ssc.checkpoint('file:///tmp/g1ex2')
 
 zkQuorum, topic = sys.argv[1:]
 kvs = KafkaUtils.createStream(ssc, zkQuorum, "spark-streaming-consumer", {topic: 1})
 lines = kvs.map(lambda x: x[1])
 
 def updateFunction(newValues, runningCount):
-        return sum(newValues, runningCount or 0)
+    if runningCount is None: 
+        runningCount = (0., 0)
+    
+    values, counter = runningCount 
+    for val in newValues: 
+        values += val[0]
+        counter += val[1]
+
+    return (values, counter) 
 
 filtered = lines.map(lambda line: line.split("\t"))\
-        		.flatMap(lambda word: [(word[3], 1), (word[4], 1)] if len(word) > 4 else [] )\
-        		.reduceByKey(lambda a, b: a+b)\
-                .updateStateByKey(updateFunction)\
-                .transform(lambda rdd: rdd.sortBy(lambda (word, count): -count))
-
+        		.map(lambda word: ((word[0], word[1]), (float(word[7]), 1)) )\
+        		.updateStateByKey(updateFunction)
+                
 filtered.foreachRDD(lambda rdd: print_rdd(rdd))
 
 # start streaming process
