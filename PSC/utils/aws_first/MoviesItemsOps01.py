@@ -35,3 +35,7 @@ print("PutItem succeeded:")
 print(json.dumps(response, indent=4, cls=DecimalEncoder))
 
 
+#response = table.put_item(Item= { 
+#   'carrier': carrier, 
+#   'delay': decimal.Decimal(str(delay)), 
+#   })
