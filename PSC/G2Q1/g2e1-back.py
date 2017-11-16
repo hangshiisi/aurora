@@ -105,20 +105,16 @@ def updateFunction(newValues, runningCount):
 
     return (values, counter, values/counter) 
 
-f1 = lines.map(lambda line: line.split(","))\
+filtered = lines.map(lambda line: line.split(","))\
         		.map(lambda f: Flight(f))\
                 .map(lambda f: ((f.Origin, f.Carrier, f.Airline), (f.DepDelay, 1)))\
-        		.updateStateByKey(updateFunction)
-
-f2 = f1.map(lambda (x, y): (x[0], (x[1], x[2],  y[2])))\
-            .groupByKey()
-
+        		.updateStateByKey(updateFunction)\
+                .map(lambda (x, y): (x[0], x[1], x[2], y[0], y[1], y[2]))\
+                .groubByKey()\
+                .map(lambda(origin, f): (origin, sorted(f, key=lambda (x, y, a, b, c): c)[:10]))
              
-filtered = f2.map(lambda (origin, flight): (origin, sorted(flight, key=lambda (a, b, c): c)[:10])) 
 
-#filtered.foreachRDD(lambda rdd: print_rdd(rdd))
-filtered.pprint() 
-
+filtered.foreachRDD(lambda rdd: print_rdd(rdd))
 
 # start streaming process
 ssc.start()
@@ -133,7 +129,3 @@ try:
 except:
     pass
     
-
-#spark-submit  --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.0.2    ./g2e1.py localhost:2181 g2e1 
-#spark-submit  --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.0.2    ./g2e1.py localhost:2181 g2e1  | tee t4.log 
-
