@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # data dir this folder needs to be available
-dataset_dir=/data/T3
+dataset_dir=/data/T2008
 
 # dataset source dir
 src_dir=/data/aviation/airline_ontime/2008
@@ -14,20 +14,17 @@ else
    mkdir $dataset_dir
 fi
 
+src=${src_dir}
+echo "Processing ${src} directory"  
 
-for src in /data/aviation/airline_ontime/* 
-do 
-   echo "Processing ${src} directory"  
-
-   for my_file in ${src}/*
-   do
-       fname=$(basename "$my_file")
-       base="${fname%.*}"    
-       echo "${base} and ${my_file}"  
-       unzip -p $my_file ${base}.csv | ./data_gen.py > ${dataset_dir}/${base}.txt
-   done 
-
+for my_file in ${src}/*
+do
+    fname=$(basename "$my_file")
+    base="${fname%.*}"    
+    echo "${base} and ${my_file}"  
+    unzip -p $my_file ${base}.csv | ./data_gen.py > ${dataset_dir}/${base}.txt
 done 
+
 
 
 echo 'Number of files cleaned:' 
