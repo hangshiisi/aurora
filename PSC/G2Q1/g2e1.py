@@ -3,6 +3,9 @@ from pyspark import SparkConf
 from pyspark.streaming import StreamingContext
 from pyspark.streaming.kafka import KafkaUtils
 from pyspark.sql import SQLContext, Row
+from pyspark.sql.types import *
+
+
 
 import sys
 import time
@@ -53,7 +56,37 @@ def getSqlContextInstance(sparkContext):
  #       .map(lambda f: ((f.Origin, f.Carrier, f.Airline), (f.DepDelay, 0.0)))\
  #         return (values, counter, values/counter) 
 
-def print_rdd(rdd):
+
+def print_rdd(rdd): 
+    print('==========XYZ S===================')
+        # Get the singleton instance of SQLContext
+    if rdd.isEmpty(): 
+        return 
+
+    schema = StructType([
+        StructField("origin", StringType(), True),
+        StructField("delay", FloatType(), True), 
+        StructField("carrier", StringType(), True),
+        StructField("airline", StringType(), True)
+        ])
+    
+    test_df = getSqlContextInstance(rdd.context).createDataFrame(rdd, schema);  
+    #"origin:string, delay:float, carrier:string,  ariline:string");  
+
+    test_df.show() 
+
+    #insert into cassandra 
+    test_df.write\
+    .format("org.apache.spark.sql.cassandra")\
+    .mode('overwrite')\
+    .options(table="g2e1", keyspace="test")\
+    .save()
+
+    print('==========XYZ E===================')
+    return 
+
+#not used any more, keep for record 
+def print_rdd_first(rdd):
     print('==========XYZ S===================')
         # Get the singleton instance of SQLContext
     if rdd.isEmpty(): 
@@ -79,6 +112,7 @@ def print_rdd(rdd):
     for (x, y, z, a, b, c) in airlines:
         print("%s, %s, %s: %f, %d, %f" % (x, y, z, a, b, c))
     print('==========XYZ E===================')
+    return 
 
 config.set('spark.streaming.stopGracefullyOnShutdown', True)
 
@@ -87,7 +121,7 @@ signal.signal(signal.SIGINT, close_handler)
 
 
 sc = SparkContext(appName='g1ex2', conf=config)
-sc.setLogLevel("WARN")
+sc.setLogLevel("ERROR")
 ssc = StreamingContext(sc, 10)
 ssc.checkpoint('file:///tmp/g1ex2')
 
@@ -96,8 +130,6 @@ kvs = KafkaUtils.createStream(ssc, zkQuorum, "spark-streaming-consumer", {topic:
 lines = kvs.map(lambda x: x[1])
 
 def updateFunction(newValues, runningCount):
-
-
     values, counter, avg_delay = runningCount or (0., 0, 0.)
     for val in newValues: 
         values += val[0]
@@ -110,15 +142,10 @@ f1 = lines.map(lambda line: line.split(","))\
                 .map(lambda f: ((f.Origin, f.Carrier, f.Airline), (f.DepDelay, 1)))\
         		.updateStateByKey(updateFunction)
 
-f2 = f1.map(lambda (x, y): (x[0], (x[1], x[2],  y[2])))\
-            .groupByKey()
+filtered = f1.map(lambda (x, y): (x[0], y[2], x[1], x[2]))
 
-             
-filtered = f2.map(lambda (origin, flight): (origin, sorted(flight, key=lambda (a, b, c): c)[:10])) 
-
-#filtered.foreachRDD(lambda rdd: print_rdd(rdd))
-filtered.pprint() 
-
+filtered.foreachRDD(lambda rdd: print_rdd(rdd))
+#filtered.pprint() 
 
 # start streaming process
 ssc.start()
