@@ -13,22 +13,14 @@ import signal
 
 from flight import Flight 
 
-#group_by_origin_dest_airline = GROUP in BY (Origin, Dest, AirlineID);
+#group_by_origin_dest = GROUP in BY (Origin, Dest);
 
-
-#average_ontime = FOREACH group_by_origin_dest_airline
-#               GENERATE FLATTEN(group) AS (Origin, Dest, AirlineID),
+#average_ontime = FOREACH group_by_origin_dest
+#               GENERATE FLATTEN(group) AS (Origin, Dest),
 #               AVG(in.ArrDelay) AS performance_index;
 
-#group_by_origin_dest = GROUP average_ontime BY (Origin, Dest);
+#X = FOREACH average_ontime GENERATE TOTUPLE( TOTUPLE('origin',$0), TOTUPLE('dest', $1),TOTUPLE('avgDelay', $2));
 
-#top_ten_airlines = FOREACH group_by_origin_dest {
-#   sorted_airlines = ORDER average_ontime BY performance_index ASC;
-#   top_airlines = LIMIT sorted_airlines 10;
-#   GENERATE FLATTEN(top_airlines);
-#}
-
-#X = FOREACH top_ten_airlines GENERATE  $0, $1, $3, $2;
 
 config = SparkConf()
 config.set("spark.streaming.stopGracefullyOnShutdown", "true") 
@@ -47,25 +39,21 @@ def print_rdd(rdd):
     if rdd.isEmpty(): 
         return 
 
-#((f.Origin, f.Dest, f.Carrier, f.Airline), (f.ArrDelay, 1)))
-
     schema = StructType([
         StructField("origin", StringType(), True),
-        StructField("dest", StringType(), True), 
-        StructField("airline", StringType(), True),       
         StructField("delay", FloatType(), True), 
+        StructField("dest", StringType(), True)
         ])
     
     test_df = getSqlContextInstance(rdd.context).createDataFrame(rdd, schema);  
-    #"origin:string, delay:float, carrier:string,  ariline:string");  
-
+    
     test_df.show() 
 
     #insert into cassandra 
     test_df.write\
     .format("org.apache.spark.sql.cassandra")\
     .mode('overwrite')\
-    .options(table="g2e3", keyspace="test")\
+    .options(table="g2e4", keyspace="test")\
     .save()
 
     print('==========XYZ E===================')
@@ -93,13 +81,13 @@ def updateFunction(newValues, runningCount):
 
 f1 = lines.map(lambda line: line.split(","))\
         		.map(lambda f: Flight(f))\
-                .map(lambda f: ((f.Origin, f.Dest, f.Carrier, f.Carrier), (f.ArrDelay, 1)))\
+                .map(lambda f: ((f.Origin, f.Dest), (f.DepDelay, 1)))\
         		.updateStateByKey(updateFunction)
 
-filtered = f1.map(lambda (x, y): (x[0], x[1], x[3], y[2]))
+filtered = f1.map(lambda (x, y): (x[0], y[2], x[1]))
 
 filtered.foreachRDD(lambda rdd: print_rdd(rdd))
-#filtered.pprint() 
+
 
 # start streaming process
 ssc.start()
