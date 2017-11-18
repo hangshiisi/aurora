@@ -15,11 +15,17 @@ from flight import Flight
 
 #group_by_origin_dest = GROUP in BY (Origin, Dest);
 
-#average_ontime = FOREACH group_by_origin_dest
-#               GENERATE FLATTEN(group) AS (Origin, Dest),
-#               AVG(in.ArrDelay) AS performance_index;
+#average_ontime = FOREACH group_by_origin_dest 
+#                 GENERATE FLATTEN(group) AS (Origin, Dest), 
+#                          AVG(in.DepDelay) AS performance_index;
 
-#X = FOREACH average_ontime GENERATE TOTUPLE( TOTUPLE('origin',$0), TOTUPLE('dest', $1),TOTUPLE('avgDelay', $2));
+
+#group_by_origin = GROUP average_ontime BY Origin; 
+
+#top_ten_airports = FOREACH group_by_origin {
+#   sorted_airports = ORDER average_ontime BY performance_index ASC;
+#   top_airports = LIMIT sorted_airports 10;
+#   GENERATE FLATTEN(top_airports);
 
 
 config = SparkConf()
@@ -27,6 +33,17 @@ config.set("spark.streaming.stopGracefullyOnShutdown", "true")
 	
 filtered = None 
 ssc = None 
+
+def close_handler(signal, frame): 
+	print('Closing down, print out result ')
+	try: 
+		if filtered: 
+			filtered.foreachRDD(lambda rdd: print_rdd(rdd))
+		if ssc: 
+			ssc.stop(true, true)
+	except: 
+		pass 	
+	sys.exit(0)	 
 
 def getSqlContextInstance(sparkContext):
     if ('sqlContextSingletonInstance' not in globals()):
@@ -53,14 +70,16 @@ def print_rdd(rdd):
     test_df.write\
     .format("org.apache.spark.sql.cassandra")\
     .mode('overwrite')\
-    .options(table="g2e4", keyspace="test")\
+    .options(table="g2e2", keyspace="test")\
     .save()
 
     print('==========XYZ E===================')
     return 
 
-#sc = SparkContext(appName='g1ex1', conf=config, pyFiles=['flight.py'])
 config.set('spark.streaming.stopGracefullyOnShutdown', True)
+
+#sc = SparkContext(appName='g1ex1', conf=config, pyFiles=['flight.py'])
+signal.signal(signal.SIGINT, close_handler)
 
 sc = SparkContext(appName='g1ex2', conf=config)
 sc.setLogLevel("ERROR")
