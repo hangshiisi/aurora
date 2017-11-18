@@ -28,13 +28,12 @@ def print_rdd(rdd):
     schema = StructType([
         StructField("route", StringType(), True), 
         StructField("delay", FloatType(), True), 
-        StructField("f1", StringType(), True), 
-        StructField("f2", StringType(), True),         
         StructField("details", StringType(), True)   
         ])
     
     test_df = getSqlContextInstance(rdd.context).createDataFrame(rdd, schema);  
-     
+    #"origin:string, delay:float, carrier:string,  ariline:string");  
+    
     test_df.show() 
 
     #insert into cassandra 
@@ -66,7 +65,8 @@ def process_record(record):
     details = "%s;%s" % (f_xy, f_yz)
 
     #print("handling %s" % route)
-    return (route, delay, f_xy.FlightNum, f_yz.FlightNum, details)
+    return (route, (delay, details))
+
 
 config = SparkConf()
 config.set("spark.streaming.stopGracefullyOnShutdown", "true") 
@@ -92,14 +92,13 @@ ff = lines.map(lambda line: line.split(","))\
 f_xy = ff.map(map_xy)
 f_yz = ff.map(map_yz)
 
-f_xyz = f_xy.join(f_yz).map(process_record)
-#.groupByKey()
+f_xyz = f_xy.join(f_yz).map(process_record).groupByKey()
 
-#f_sorted = f_xyz.map(lambda (route, recs): (route, sorted(recs,  
-#                     key = lambda recs: recs[0])[0]))
+f_sorted = f_xyz.map(lambda (route, recs): (route, sorted(recs,  
+                     key = lambda recs: recs[0])[0]))
 
 #f_sorted.pprint() 
-f_xyz.foreachRDD(lambda rdd: print_rdd(rdd))
+f_sorted.foreachRDD(lambda rdd: print_rdd(rdd))
 
 # start streaming process
 ssc.start()

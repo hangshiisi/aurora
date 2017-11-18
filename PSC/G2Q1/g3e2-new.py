@@ -17,7 +17,7 @@ def getSqlContextInstance(sparkContext):
         globals()['sqlContextSingletonInstance'] = SQLContext(sparkContext)
     return globals()['sqlContextSingletonInstance']
 
-def print_rdd(rdd): 
+def print_rdd(rdd, name): 
     print('==========XYZ S===================')
    
     # Get the singleton instance of SQLContext
@@ -26,13 +26,12 @@ def print_rdd(rdd):
 
     #route, delay, details
     schema = StructType([
-        StructField("route", StringType(), True), 
+        StructField("fdate", StringType(), True), 
+        StructField("airport", StringType(), True), 
         StructField("delay", FloatType(), True), 
-        StructField("f1", StringType(), True), 
-        StructField("f2", StringType(), True),         
         StructField("details", StringType(), True)   
         ])
-    
+
     test_df = getSqlContextInstance(rdd.context).createDataFrame(rdd, schema);  
      
     test_df.show() 
@@ -41,21 +40,20 @@ def print_rdd(rdd):
     test_df.write\
     .format("org.apache.spark.sql.cassandra")\
     .mode('overwrite')\
-    .options(table="g3e2", keyspace="test")\
+    .options(table=name, keyspace="test")\
     .save()
 
     print('==========XYZ E===================')
     return 
 
-
 def map_xy(f): 
     fdate = datetime.date(f.Year, f.Month, f.Day)
-    return ((str(fdate), f.Dest), f)
+    return (str(fdate), f.Dest, f.DepDelay + f.ArrDelay, str(f))
 
 def map_yz(f):
     fdate = datetime.date(f.Year, f.Month, f.Day)
     fdate -= datetime.timedelta(days=2)
-    return ((str(fdate), f.Origin), f)
+    return (str(fdate), f.Origin, f.DepDelay + f.ArrDelay, str(f))
 
 def process_record(record): 
     f_xy = record[1][0]
@@ -92,14 +90,16 @@ ff = lines.map(lambda line: line.split(","))\
 f_xy = ff.map(map_xy)
 f_yz = ff.map(map_yz)
 
-f_xyz = f_xy.join(f_yz).map(process_record)
+#f_xyz = f_xy.join(f_yz).map(process_record)
 #.groupByKey()
 
 #f_sorted = f_xyz.map(lambda (route, recs): (route, sorted(recs,  
 #                     key = lambda recs: recs[0])[0]))
 
 #f_sorted.pprint() 
-f_xyz.foreachRDD(lambda rdd: print_rdd(rdd))
+f_xy.foreachRDD(lambda rdd: print_rdd(rdd, 'xy_g3e2'))
+f_yz.foreachRDD(lambda rdd: print_rdd(rdd, 'yz_g3e2'))
+
 
 # start streaming process
 ssc.start()

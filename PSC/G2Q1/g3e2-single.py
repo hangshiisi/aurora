@@ -40,7 +40,7 @@ def print_rdd(rdd):
     #insert into cassandra 
     test_df.write\
     .format("org.apache.spark.sql.cassandra")\
-    .mode('overwrite')\
+    .mode('append')\
     .options(table="g3e2", keyspace="test")\
     .save()
 
@@ -62,7 +62,8 @@ def process_record(record):
     f_yz = record[1][1]
 
     route = '_'.join((f_xy.Origin, f_xy.Dest, f_yz.Dest, record[0][0]))
-    delay = f_xy.DepDelay + f_xy.ArrDelay + f_yz.DepDelay + f_yz.ArrDelay
+    #delay = f_xy.DepDelay + f_xy.ArrDelay + f_yz.DepDelay + f_yz.ArrDelay
+    delay =  f_xy.ArrDelay + f_yz.ArrDelay
     details = "%s;%s" % (f_xy, f_yz)
 
     #print("handling %s" % route)
@@ -89,8 +90,27 @@ lines = kvs.map(lambda x: x[1])
 ff = lines.map(lambda line: line.split(","))\
         		.map(lambda f: Flight(f))
 
-f_xy = ff.map(map_xy)
-f_yz = ff.map(map_yz)
+
+def filter_record(f): 
+    k, v = f 
+   
+    if k[0]=='2008-04-03' and k[1] in ('BOS', 'ATL'): 
+        return True 
+
+    if k[0]=='2008-09-07' and k[1] in ('PHX', 'JFK'): 
+        return True 
+
+    if k[0]=='2008-01-24' and k[1] in ('DFW', 'STL'): 
+        return True 
+
+    if k[0]=='2008-05-16' and k[1] in ('LAX', 'MIA'): 
+        return True 
+
+    return False 
+    
+
+f_xy = ff.map(map_xy).filter(lambda (k,v): v.CRSDepTime < '1200').filter(filter_record)
+f_yz = ff.map(map_yz).filter(lambda (k,v): v.CRSDepTime > '1200').filter(filter_record)
 
 f_xyz = f_xy.join(f_yz).map(process_record)
 #.groupByKey()
