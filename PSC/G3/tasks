@@ -16,3 +16,18 @@ c) Tom wants to arrive at each destination with as little delay as possible. You
 
 Your mission (should you choose to accept it!) is to find, for each X-Y-Z and day/month (dd/mm) combination in the year 2008, the two flights (X-Y and Y-Z) that satisfy constraints (a) and (b) and have the best individual performance with respect to constraint (c), if such flights exist.
 
+
+
+BOS ➝ ATL ➝ LAX, 03/04/2008:
+
+PHX ➝ JFK ➝ MSP, 07/09/2008:
+
+DFW ➝ STL ➝ ORD, 24/01/2008:
+
+LAX ➝ MIA ➝ LAX, 16/05/2008:
+
+#BOS ➝ ATL ➝ LAX, 03/04/2008: 2008-4-3 
+#PHX ➝ JFK ➝ MSP, 07/09/2008: 2008-9-7
+#DFW ➝ STL ➝ ORD, 24/01/2008: 2008-1-24
+#LAX ➝ MIA ➝ LAX, 16/05/2008: 2008-5-16
+# BOS, ATL, LAX, PHX, JFK, MSP, DFW, STL, ORD, MIA 
